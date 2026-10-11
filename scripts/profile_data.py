@@ -172,6 +172,20 @@ CHECKS = [
         """,
     ),
     (
+        "products: rows missing category, name, description and photos at the same time",
+        """
+        select count(*) from products
+        where product_category_name is null and product_name_lenght is null
+          and product_description_lenght is null and product_photos_qty is null
+        """,
+    ),
+    (
+        "customers: rows whose zip prefix starts with 0",
+        """
+        select count(*) from customers where customer_zip_code_prefix like '0%'
+        """,
+    ),
+    (
         "order_payments: payments with value 0 / count by payment_type",
         """
         select

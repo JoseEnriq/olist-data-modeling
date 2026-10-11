@@ -140,5 +140,7 @@ File: `product_category_name_translation.csv` · 71 rows
 | order_payments: payments with 0 installments | 2 |
 | orders: purchase date range | 2016-09-04 21:15:19 / 2018-10-17 17:30:18 |
 | products: rows without category / categories missing from translation table | 610 / 2 |
+| products: rows missing category, name, description and photos at the same time | 610 |
+| customers: rows whose zip prefix starts with 0 | 23995 |
 | order_payments: payments with value 0 / count by payment_type | 9 / credit_card=76795, boleto=19784, voucher=5775, debit_card=1529, not_defined=3 |
 | orders: orders whose item total (price + freight) differs from payments by more than 1 BRL | 249 |
