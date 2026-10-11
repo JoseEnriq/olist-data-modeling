@@ -1,0 +1,127 @@
+// Modelo normalizado (lógico, 3FN) dos dados da Olist.
+// Abra em https://dbdiagram.io para ver o diagrama.
+// As justificativas de cada decisão estão em docs/decisions.md.
+
+Project olist_normalized {
+  database_type: 'DuckDB'
+  Note: 'Modelo lógico a partir das 9 tabelas de origem. Nomes de coluna padronizados (ver convenção em docs/decisions.md); valores de domínio em português, como vieram.'
+}
+
+Table customers {
+  customer_unique_id varchar [pk, note: 'A pessoa que compra. Na origem, um mesmo cliente aparece com vários customer_id.']
+
+  Note: 'Só a identidade do cliente. O endereço fica no pedido, porque 250 clientes compraram com mais de um CEP.'
+}
+
+Table orders {
+  order_id varchar [pk]
+  customer_id varchar [unique, not null, note: 'Identificador técnico da origem, um por pedido. Mantido só para rastreabilidade.']
+  customer_unique_id varchar [not null]
+  customer_zip_code_prefix varchar(5) [not null, note: 'Endereço de entrega do pedido (texto: há prefixos com zero à esquerda).']
+  customer_city varchar [not null]
+  customer_state char(2) [not null]
+  order_status varchar [not null, note: 'delivered, shipped, canceled, unavailable, invoiced, processing, created, approved']
+  purchased_at timestamp [not null]
+  approved_at timestamp [note: 'Nulo quando o pagamento não foi aprovado.']
+  delivered_to_carrier_at timestamp
+  delivered_to_customer_at timestamp
+  estimated_delivery_date date [not null]
+}
+
+Table order_items {
+  order_id varchar [not null]
+  order_item_id int [not null, note: 'Sequência 1..n dentro do pedido. Cada linha é uma unidade: não existe coluna de quantidade.']
+  product_id varchar [not null]
+  seller_id varchar [not null]
+  shipping_limit_at timestamp [not null]
+  price decimal(10, 2) [not null]
+  freight_value decimal(10, 2) [not null, note: 'Frete rateado por item na origem.']
+
+  indexes {
+    (order_id, order_item_id) [pk]
+  }
+}
+
+Table order_payments {
+  order_id varchar [not null]
+  payment_sequential int [not null, note: 'Ordem do pagamento dentro do pedido; pode ter saltos.']
+  payment_type varchar [not null, note: 'credit_card, boleto, voucher, debit_card, not_defined']
+  payment_installments int [not null]
+  payment_value decimal(10, 2) [not null]
+
+  indexes {
+    (order_id, payment_sequential) [pk]
+  }
+}
+
+Table reviews {
+  review_id varchar [pk]
+  review_score smallint [not null, note: '1 a 5']
+  review_comment_title varchar
+  review_comment_message varchar
+  created_at timestamp [not null]
+  answered_at timestamp [not null]
+
+  Note: 'Uma avaliação pode cobrir mais de um pedido do mesmo cliente (789 casos, sempre com o mesmo conteúdo).'
+}
+
+Table order_reviews {
+  order_id varchar [not null]
+  review_id varchar [not null]
+
+  indexes {
+    (order_id, review_id) [pk]
+  }
+
+  Note: 'Tabela associativa: resolve a relação N:N entre pedidos e avaliações.'
+}
+
+Table products {
+  product_id varchar [pk]
+  product_category_name varchar [note: 'Nulo em 610 produtos sem cadastro completo.']
+  product_name_length int [note: 'Na origem: product_name_lenght (erro de grafia corrigido).']
+  product_description_length int [note: 'Na origem: product_description_lenght.']
+  product_photos_qty int
+  product_weight_g int
+  product_length_cm int
+  product_height_cm int
+  product_width_cm int
+}
+
+Table product_categories {
+  product_category_name varchar [pk, note: 'Em português, como no dataset. A tradução para inglês não é usada.']
+
+  Note: 'Domínio das categorias, montado a partir dos produtos (inclui 2 categorias que faltam na tabela de tradução).'
+}
+
+Table sellers {
+  seller_id varchar [pk]
+  seller_zip_code_prefix varchar(5) [not null]
+  seller_city varchar [not null]
+  seller_state char(2) [not null]
+}
+
+Table zip_codes {
+  zip_code_prefix varchar(5) [pk]
+  latitude double [note: 'Mediana dos pontos da geolocalização; nula se o prefixo não aparece nela.']
+  longitude double
+
+  Note: 'Uma linha por prefixo de CEP usado por clientes, vendedores ou pela geolocalização. Substitui a geolocalização bruta, que tem ~1 milhão de pontos e não pode ser ligada diretamente.'
+}
+
+// Relacionamentos (">" = muitos-para-um)
+
+Ref: orders.customer_unique_id > customers.customer_unique_id
+Ref: orders.customer_zip_code_prefix > zip_codes.zip_code_prefix
+Ref: sellers.seller_zip_code_prefix > zip_codes.zip_code_prefix
+
+Ref: order_items.order_id > orders.order_id
+Ref: order_items.product_id > products.product_id
+Ref: order_items.seller_id > sellers.seller_id
+
+Ref: order_payments.order_id > orders.order_id
+
+Ref: order_reviews.order_id > orders.order_id
+Ref: order_reviews.review_id > reviews.review_id
+
+Ref: products.product_category_name > product_categories.product_category_name
