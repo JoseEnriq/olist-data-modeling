@@ -1,0 +1,19 @@
+# Raw data comes from Kaggle (see scripts/download_data.py)
+data/raw/
+
+# Local DuckDB database
+*.duckdb
+*.duckdb.wal
+
+# dbt artifacts
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+
+# Python
+.venv/
+__pycache__/
+
+# Private notes
+estudo/
+CLAUDE.md
