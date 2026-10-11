@@ -42,6 +42,63 @@ CHECKS = [
         """,
     ),
     (
+        "order_items: orders whose order_item_id is not 1..n / orders with the same product on several lines",
+        """
+        select
+            (select count(*) from (
+                select order_id from order_items group by 1
+                having min(order_item_id) <> 1 or max(order_item_id) <> count(*)
+            )),
+            (select count(*) from (
+                select order_id, product_id from order_items group by 1, 2 having count(*) > 1
+            ))
+        """,
+    ),
+    (
+        "order_items: same product in the same order with different price or freight",
+        """
+        select count(*) from (
+            select order_id, product_id from order_items group by 1, 2
+            having count(distinct price) > 1 or count(distinct freight_value) > 1
+        )
+        """,
+    ),
+    (
+        "order_items: orders with more than one seller",
+        """
+        select count(*) from (
+            select order_id from order_items group by 1 having count(distinct seller_id) > 1
+        )
+        """,
+    ),
+    (
+        "order_payments: orders whose payment_sequential is not 1..n",
+        """
+        select count(*) from (
+            select order_id from order_payments group by 1
+            having min(payment_sequential) <> 1 or max(payment_sequential) <> count(*)
+        )
+        """,
+    ),
+    (
+        "orders: estimated delivery dates with a time part / reviews created with a time part",
+        """
+        select
+            (select count(*) from orders
+             where cast(order_estimated_delivery_date as time) <> time '00:00:00'),
+            (select count(*) from order_reviews
+             where cast(review_creation_date as time) <> time '00:00:00')
+        """,
+    ),
+    (
+        "products: categories missing from the translation table",
+        """
+        select string_agg(distinct product_category_name, ', ') from products
+        where product_category_name not in
+              (select product_category_name from product_category_name_translation)
+        """,
+    ),
+    (
         "order_payments: (order_id, payment_sequential) is unique",
         """
         select count(*) = count(distinct (order_id, payment_sequential)) from order_payments
@@ -52,6 +109,81 @@ CHECKS = [
         """
         select count(*), count(distinct review_id), count(distinct (review_id, order_id))
         from order_reviews
+        """,
+    ),
+    (
+        "customers: customer_unique_id with more than one zip prefix / city / state",
+        """
+        select
+            count(*) filter (where zips > 1),
+            count(*) filter (where cities > 1),
+            count(*) filter (where states > 1)
+        from (
+            select customer_unique_id,
+                   count(distinct customer_zip_code_prefix) as zips,
+                   count(distinct customer_city) as cities,
+                   count(distinct customer_state) as states
+            from customers group by 1
+        )
+        """,
+    ),
+    (
+        "customers: zip prefixes with more than one city / more than one state",
+        """
+        select count(*) filter (where cities > 1), count(*) filter (where states > 1)
+        from (
+            select customer_zip_code_prefix,
+                   count(distinct customer_city) as cities,
+                   count(distinct customer_state) as states
+            from customers group by 1
+        )
+        """,
+    ),
+    (
+        "geolocation: zip prefixes with more than one city name / more than one state",
+        """
+        select count(*) filter (where cities > 1), count(*) filter (where states > 1)
+        from (
+            select geolocation_zip_code_prefix,
+                   count(distinct geolocation_city) as cities,
+                   count(distinct geolocation_state) as states
+            from geolocation group by 1
+        )
+        """,
+    ),
+    (
+        "order_reviews: review_ids on more than one order / of those, with differing content / of those, from a single customer",
+        """
+        with shared as (
+            select review_id
+            from order_reviews group by 1 having count(distinct order_id) > 1
+        ), per_review as (
+            select r.review_id,
+                   count(distinct r.review_score) as scores,
+                   count(distinct coalesce(r.review_comment_message, '')) as messages,
+                   count(distinct coalesce(r.review_comment_title, '')) as titles,
+                   count(distinct r.review_creation_date) as dates,
+                   count(distinct r.review_answer_timestamp) as answers,
+                   count(distinct c.customer_unique_id) as customers
+            from order_reviews r
+            join shared using (review_id)
+            join orders o using (order_id)
+            join customers c using (customer_id)
+            group by 1
+        )
+        select count(*),
+               count(*) filter (where scores > 1 or messages > 1 or titles > 1
+                                      or dates > 1 or answers > 1),
+               count(*) filter (where customers = 1)
+        from per_review
+        """,
+    ),
+    (
+        "order_reviews: max reviews per order / max orders per review_id",
+        """
+        select
+            (select max(n) from (select order_id, count(*) n from order_reviews group by 1)),
+            (select max(n) from (select review_id, count(*) n from order_reviews group by 1))
         """,
     ),
     (

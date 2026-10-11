@@ -124,8 +124,19 @@ File: `product_category_name_translation.csv` · 71 rows
 | orders: distinct customer_id vs distinct customer_unique_id | 99441 / 96096 |
 | customers: customer_unique_id with more than one customer_id | 2997 |
 | order_items: (order_id, order_item_id) is unique | True |
+| order_items: orders whose order_item_id is not 1..n / orders with the same product on several lines | 0 / 7088 |
+| order_items: same product in the same order with different price or freight | 0 |
+| order_items: orders with more than one seller | 1278 |
+| order_payments: orders whose payment_sequential is not 1..n | 80 |
+| orders: estimated delivery dates with a time part / reviews created with a time part | 0 / 85 |
+| products: categories missing from the translation table | pc_gamer, portateis_cozinha_e_preparadores_de_alimentos |
 | order_payments: (order_id, payment_sequential) is unique | True |
 | order_reviews: rows / distinct review_id / distinct (review_id, order_id) | 99224 / 98410 / 99224 |
+| customers: customer_unique_id with more than one zip prefix / city / state | 250 / 122 / 39 |
+| customers: zip prefixes with more than one city / more than one state | 39 / 0 |
+| geolocation: zip prefixes with more than one city name / more than one state | 8556 / 8 |
+| order_reviews: review_ids on more than one order / of those, with differing content / of those, from a single customer | 789 / 0 / 789 |
+| order_reviews: max reviews per order / max orders per review_id | 3 / 3 |
 | order_reviews: orders with more than one review | 547 |
 | geolocation: rows / distinct zip code prefixes | 1000163 / 19015 |
 | geolocation: exact duplicate rows | 261831 |
