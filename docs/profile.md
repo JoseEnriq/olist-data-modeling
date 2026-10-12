@@ -129,11 +129,12 @@ File: `product_category_name_translation.csv` · 71 rows
 | order_items: orders with more than one seller | 1278 |
 | order_payments: orders whose payment_sequential is not 1..n | 80 |
 | orders: estimated delivery dates with a time part / reviews created with a time part | 0 / 85 |
-| products: categories missing from the translation table | pc_gamer, portateis_cozinha_e_preparadores_de_alimentos |
+| products: categories missing from the translation table | portateis_cozinha_e_preparadores_de_alimentos, pc_gamer |
 | order_payments: (order_id, payment_sequential) is unique | True |
 | order_reviews: rows / distinct review_id / distinct (review_id, order_id) | 99224 / 98410 / 99224 |
 | customers: customer_unique_id with more than one zip prefix / city / state | 250 / 122 / 39 |
 | customers: zip prefixes with more than one city / more than one state | 39 / 0 |
+| customers + sellers: zip prefixes with more than one state / more than one city | 33 / 136 |
 | geolocation: zip prefixes with more than one city name / more than one state | 8556 / 8 |
 | order_reviews: review_ids on more than one order / of those, with differing content / of those, from a single customer | 789 / 0 / 789 |
 | order_reviews: max reviews per order / max orders per review_id | 3 / 3 |
@@ -149,6 +150,8 @@ File: `product_category_name_translation.csv` · 71 rows
 | orders: delivered to customer before purchase / handed to carrier before approval | 0 / 1359 |
 | orders: orders per month in the first 4 and last 3 months of the range | 2016-09=4, 2016-10=324, 2016-12=1, 2017-01=800, 2018-08=6512, 2018-09=16, 2018-10=4 |
 | order_payments: payments with 0 installments | 2 |
+| dates: earliest and latest value of every date column | purchased 2016-09-04 → 2018-10-17, approved 2016-09-15 → 2018-09-03, to_carrier 2016-10-08 → 2018-09-11, to_customer 2016-10-11 → 2018-10-17, estimated 2016-09-30 → 2018-11-12, shipping_limit 2016-09-19 → 2020-04-09, review_created 2016-10-02 → 2018-08-31, review_answered 2016-10-07 → 2018-10-29 |
+| order_items: shipping limit dates after 2018 | 4 |
 | orders: purchase date range | 2016-09-04 21:15:19 / 2018-10-17 17:30:18 |
 | products: rows without category / categories missing from translation table | 610 / 2 |
 | products: rows missing category, name, description and photos at the same time | 610 |
