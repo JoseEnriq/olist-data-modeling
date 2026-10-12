@@ -140,6 +140,22 @@ CHECKS = [
         """,
     ),
     (
+        "customers + sellers: zip prefixes with more than one state / more than one city",
+        """
+        with addresses as (
+            select customer_zip_code_prefix as zip, customer_city as city, customer_state as state
+            from customers
+            union all
+            select seller_zip_code_prefix, seller_city, seller_state from sellers
+        )
+        select count(*) filter (where states > 1), count(*) filter (where cities > 1)
+        from (
+            select zip, count(distinct state) as states, count(distinct city) as cities
+            from addresses group by 1
+        )
+        """,
+    ),
+    (
         "geolocation: zip prefixes with more than one city name / more than one state",
         """
         select count(*) filter (where cities > 1), count(*) filter (where states > 1)
@@ -284,6 +300,35 @@ CHECKS = [
         "order_payments: payments with 0 installments",
         """
         select count(*) from order_payments where payment_installments = 0
+        """,
+    ),
+    (
+        "dates: earliest and latest value of every date column",
+        """
+        select string_agg(role || ' ' || first::date || ' → ' || last::date, ', ')
+        from (
+            select 'purchased' as role, min(order_purchase_timestamp) as first,
+                   max(order_purchase_timestamp) as last from orders
+            union all select 'approved', min(order_approved_at), max(order_approved_at) from orders
+            union all select 'to_carrier', min(order_delivered_carrier_date),
+                             max(order_delivered_carrier_date) from orders
+            union all select 'to_customer', min(order_delivered_customer_date),
+                             max(order_delivered_customer_date) from orders
+            union all select 'estimated', min(order_estimated_delivery_date),
+                             max(order_estimated_delivery_date) from orders
+            union all select 'shipping_limit', min(shipping_limit_date),
+                             max(shipping_limit_date) from order_items
+            union all select 'review_created', min(review_creation_date),
+                             max(review_creation_date) from order_reviews
+            union all select 'review_answered', min(review_answer_timestamp),
+                             max(review_answer_timestamp) from order_reviews
+        )
+        """,
+    ),
+    (
+        "order_items: shipping limit dates after 2018",
+        """
+        select count(*) from order_items where shipping_limit_date >= timestamp '2019-01-01'
         """,
     ),
     (
