@@ -1,0 +1,175 @@
+// Modelo dimensional (star schema) dos dados da Olist.
+// Abra em https://dbdiagram.io para ver o diagrama.
+// O grão de cada fato e as justificativas estão em docs/decisions.md.
+
+Project olist_dimensional {
+  database_type: 'DuckDB'
+  Note: 'Quatro processos de negócio (itens vendidos, ciclo do pedido, pagamentos, avaliações), cada um com seu fato e seu grão, ligados a dimensões compartilhadas.'
+}
+
+// ---------- Dimensões ----------
+
+Table dim_date {
+  date_key int [pk, note: 'Inteiro AAAAMMDD, ex.: 20170315.']
+  date date [unique, not null]
+  year int [not null]
+  quarter int [not null]
+  month int [not null]
+  month_name varchar [not null]
+  year_month varchar [not null, note: 'Ex.: 2017-03. Útil para séries mensais.']
+  day_of_month int [not null]
+  day_of_week int [not null, note: '1 = segunda ... 7 = domingo']
+  day_name varchar [not null]
+  is_weekend boolean [not null]
+
+  Note: 'Um dia por linha, de 2016-01-01 a 2018-12-31. Usada em vários papéis: compra, aprovação, envio, entrega, entrega prevista, avaliação.'
+}
+
+Table dim_customer {
+  customer_key varchar [pk, note: 'Hash de customer_unique_id.']
+  customer_unique_id varchar [unique, not null]
+  first_purchased_at timestamp [not null]
+  cohort_month varchar [not null, note: 'Mês da primeira compra (AAAA-MM). Base para análises de retenção.']
+
+  Note: 'Uma linha por pessoa. O endereço não fica aqui: ele muda de pedido para pedido (ver dim_location).'
+}
+
+Table dim_location {
+  location_key varchar [pk, note: 'Hash de (zip_code_prefix, city, state).']
+  zip_code_prefix varchar(5) [not null]
+  city varchar [not null]
+  state char(2) [not null]
+  latitude double [note: 'Mediana dos pontos do prefixo; nula se o prefixo não está na geolocalização.']
+  longitude double
+
+  Note: 'Endereço de entrega como foi informado no pedido. Uma linha por combinação de prefixo, cidade e estado, porque o mesmo prefixo aparece com estados diferentes.'
+}
+
+Table dim_product {
+  product_key varchar [pk, note: 'Hash de product_id.']
+  product_id varchar [unique, not null]
+  product_category_name varchar [not null, note: 'Em português. "sem_categoria" quando a origem não informa.']
+  product_name_length int
+  product_description_length int
+  product_photos_qty int
+  product_weight_g int
+  product_length_cm int
+  product_height_cm int
+  product_width_cm int
+}
+
+Table dim_seller {
+  seller_key varchar [pk, note: 'Hash de seller_id.']
+  seller_id varchar [unique, not null]
+  seller_zip_code_prefix varchar(5) [not null]
+  seller_city varchar [not null]
+  seller_state char(2) [not null]
+  latitude double
+  longitude double
+
+  Note: 'O vendedor tem um endereço só, então a localização fica achatada na própria dimensão.'
+}
+
+// ---------- Fatos ----------
+
+Table fct_order_items {
+  order_id varchar [not null, note: 'Dimensão degenerada: identifica o pedido sem ter tabela própria.']
+  order_item_id int [not null]
+  customer_key varchar [not null]
+  delivery_location_key varchar [not null]
+  product_key varchar [not null]
+  seller_key varchar [not null]
+  purchase_date_key int [not null]
+  order_status varchar [not null, note: 'Degenerada; permite filtrar cancelados sem juntar com fct_orders.']
+  shipping_limit_at timestamp [not null]
+  price decimal(10, 2) [not null]
+  freight_value decimal(10, 2) [not null]
+
+  indexes {
+    (order_id, order_item_id) [pk]
+  }
+
+  Note: 'Fato transacional. Grão: uma unidade de produto vendida num pedido.'
+}
+
+Table fct_orders {
+  order_id varchar [pk]
+  customer_key varchar [not null]
+  delivery_location_key varchar [not null]
+  purchase_date_key int [not null]
+  approved_date_key int
+  delivered_to_carrier_date_key int
+  delivered_to_customer_date_key int
+  estimated_delivery_date_key int [not null]
+  order_status varchar [not null]
+  purchased_at timestamp [not null]
+  approved_at timestamp
+  delivered_to_carrier_at timestamp
+  delivered_to_customer_at timestamp
+  estimated_delivery_date date [not null]
+  items_count int [not null, note: '0 em pedidos sem itens.']
+  items_price_total decimal(10, 2) [not null]
+  freight_total decimal(10, 2) [not null]
+  payment_total decimal(10, 2) [not null]
+  hours_to_approve decimal(10, 2)
+  days_to_deliver decimal(10, 2) [note: 'Da compra até a entrega ao cliente.']
+  days_late_vs_estimate decimal(10, 2) [note: 'Entrega menos data prevista; positivo = atrasou.']
+  is_delivered boolean [not null]
+  is_late boolean [note: 'Nulo quando o pedido não foi entregue.']
+
+  Note: 'Accumulating snapshot. Grão: um pedido, com uma coluna de data para cada etapa do ciclo. Datas nulas = etapa ainda não aconteceu.'
+}
+
+Table fct_payments {
+  order_id varchar [not null]
+  payment_sequential int [not null]
+  customer_key varchar [not null]
+  purchase_date_key int [not null]
+  payment_type varchar [not null, note: 'Degenerada: 5 valores, sem atributos próprios.']
+  payment_installments int [not null]
+  payment_value decimal(10, 2) [not null]
+
+  indexes {
+    (order_id, payment_sequential) [pk]
+  }
+
+  Note: 'Fato transacional. Grão: um pagamento de um pedido.'
+}
+
+Table fct_reviews {
+  review_id varchar [not null]
+  order_id varchar [not null]
+  customer_key varchar [not null]
+  review_created_date_key int [not null]
+  review_score smallint [not null]
+  has_comment boolean [not null]
+  hours_to_answer decimal(10, 2) [not null]
+
+  indexes {
+    (review_id, order_id) [pk]
+  }
+
+  Note: 'Grão: uma avaliação ligada a um pedido. Uma avaliação que cobre 2 pedidos gera 2 linhas; para contar avaliações, use count(distinct review_id).'
+}
+
+// ---------- Relacionamentos ----------
+
+Ref: fct_order_items.customer_key > dim_customer.customer_key
+Ref: fct_order_items.delivery_location_key > dim_location.location_key
+Ref: fct_order_items.product_key > dim_product.product_key
+Ref: fct_order_items.seller_key > dim_seller.seller_key
+Ref: fct_order_items.purchase_date_key > dim_date.date_key
+
+Ref: fct_orders.customer_key > dim_customer.customer_key
+Ref: fct_orders.delivery_location_key > dim_location.location_key
+Ref: fct_orders.purchase_date_key > dim_date.date_key
+Ref: fct_orders.approved_date_key > dim_date.date_key
+Ref: fct_orders.delivered_to_carrier_date_key > dim_date.date_key
+Ref: fct_orders.delivered_to_customer_date_key > dim_date.date_key
+Ref: fct_orders.estimated_delivery_date_key > dim_date.date_key
+
+Ref: fct_payments.customer_key > dim_customer.customer_key
+Ref: fct_payments.purchase_date_key > dim_date.date_key
+
+Ref: fct_reviews.customer_key > dim_customer.customer_key
+Ref: fct_reviews.review_created_date_key > dim_date.date_key
