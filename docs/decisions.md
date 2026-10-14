@@ -199,6 +199,22 @@ Em dimensões, nulo atrapalha filtros e gráficos ("(em branco)"). Os 610 produt
 | `customers` | `dim_customer` | ganha primeira compra e coorte |
 | — | `dim_date` | nova: permite analisar por mês, dia da semana etc. sem funções de data em toda consulta |
 
+## Implementação no dbt
+
+### 21. Camada de staging: tipar e renomear, sem mudar o grão
+Cada tabela de origem tem um modelo `stg_*` em `dbt/models/staging/`, com o mesmo grão da origem. O staging só faz três coisas: converte tipos, renomeia colunas para a convenção e documenta. Junções, deduplicações e agregações ficam para os marts. Assim, qualquer número dos marts pode ser rastreado até uma linha da origem.
+
+### 22. CSVs lidos como texto, tipos decididos no staging
+As sources leem todas as colunas como texto (`all_varchar = true`), e cada `stg_*` faz o `cast` explícito. A alternativa, deixar o leitor de CSV adivinhar os tipos, funciona hoje, mas pode mudar com uma nova versão do arquivo ou da ferramenta, e um CEP como `01037` viraria o número `1037`. Com tipos explícitos, a regra fica escrita e testada (há testes de que todo prefixo de CEP tem 5 caracteres).
+
+### 23. Staging como view, marts como tabela
+Os modelos de staging são views: são baratos de recriar e ninguém consulta direto. Os marts serão tabelas, porque são o que as análises e o BI leem.
+
+### 24. Testes na origem e no staging
+Antes de modelar, os testes confirmam o que a exploração encontrou: chaves únicas (simples e compostas), valores aceitos para status, tipo de pagamento e nota, e nenhuma chave órfã entre itens, pedidos, produtos, vendedores, pagamentos e avaliações.
+
+Um teste fica como **alerta**, e não como falha: 42 pontos da geolocalização, em 21 prefixos, estão fora do território brasileiro. Eles não são removidos no staging, porque a mediana por prefixo (decisão 3) já os ignora, e o alerta deixa o problema visível a cada execução.
+
 ## O que ficou de fora
 - **Tradução das categorias:** os valores ficam em português (decisão 7).
 - **Cidade e estado da geolocalização:** grafias inconsistentes (decisão 3).
