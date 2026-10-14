@@ -1,0 +1,68 @@
+version: 2
+
+# The raw CSVs are read straight from data/raw/ (see scripts/download_data.py).
+# Every column is read as text on purpose: types are decided in the staging
+# models, not guessed by the CSV reader (zip prefixes would lose leading zeros).
+
+sources:
+  - name: olist
+    description: Brazilian E-Commerce Public Dataset by Olist (Kaggle, CC BY-NC-SA 4.0).
+    tables:
+      - name: orders
+        description: One row per order.
+        meta:
+          external_location: "read_csv('../data/raw/olist_orders_dataset.csv', header = true, all_varchar = true)"
+        columns:
+          - name: order_id
+            data_tests: [unique, not_null]
+
+      - name: customers
+        description: One row per customer_id, which is generated per order.
+        meta:
+          external_location: "read_csv('../data/raw/olist_customers_dataset.csv', header = true, all_varchar = true)"
+        columns:
+          - name: customer_id
+            data_tests: [unique, not_null]
+
+      - name: order_items
+        description: One row per unit of product in an order.
+        meta:
+          external_location: "read_csv('../data/raw/olist_order_items_dataset.csv', header = true, all_varchar = true)"
+
+      - name: order_payments
+        description: One row per payment of an order.
+        meta:
+          external_location: "read_csv('../data/raw/olist_order_payments_dataset.csv', header = true, all_varchar = true)"
+
+      - name: order_reviews
+        description: One row per review and order; a review can cover more than one order.
+        meta:
+          external_location: "read_csv('../data/raw/olist_order_reviews_dataset.csv', header = true, all_varchar = true)"
+
+      - name: products
+        description: One row per product.
+        meta:
+          external_location: "read_csv('../data/raw/olist_products_dataset.csv', header = true, all_varchar = true)"
+        columns:
+          - name: product_id
+            data_tests: [unique, not_null]
+
+      - name: sellers
+        description: One row per seller.
+        meta:
+          external_location: "read_csv('../data/raw/olist_sellers_dataset.csv', header = true, all_varchar = true)"
+        columns:
+          - name: seller_id
+            data_tests: [unique, not_null]
+
+      - name: geolocation
+        description: Coordinate samples per zip code prefix; many rows per prefix and many exact duplicates.
+        meta:
+          external_location: "read_csv('../data/raw/olist_geolocation_dataset.csv', header = true, all_varchar = true)"
+
+      - name: product_category_name_translation
+        description: >
+          Portuguese to English category names. Declared for completeness but not used:
+          category values stay in Portuguese (see docs/decisions.md, decision 7).
+        meta:
+          external_location: "read_csv('../data/raw/product_category_name_translation.csv', header = true, all_varchar = true)"
