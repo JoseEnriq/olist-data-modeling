@@ -1,0 +1,21 @@
+name: olist
+version: "1.0.0"
+profile: olist
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  olist:
+    # Staging is a thin, typed layer over the raw files: cheap to rebuild as views.
+    staging:
+      +materialized: view
+    # Marts are what people query, so they are stored as tables.
+    marts:
+      +materialized: table

@@ -1,0 +1,9 @@
+# Local DuckDB file, created next to this file. No credentials needed.
+# Run dbt from the dbt/ folder so the relative paths resolve.
+olist:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: olist.duckdb
+      threads: 4
