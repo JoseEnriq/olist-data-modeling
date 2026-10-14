@@ -1,0 +1,142 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: One row per order, with typed timestamps.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_id
+        description: Technical id from the source, one per order (1:1 with order_id).
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: order_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [delivered, shipped, canceled, unavailable, invoiced, processing, created, approved]
+      - name: purchased_at
+        data_tests: [not_null]
+      - name: estimated_delivery_date
+        data_tests: [not_null]
+
+  - name: stg_customers
+    description: One row per customer_id. The person is customer_unique_id.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "length(customer_zip_code_prefix) = 5"
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]
+      - name: customer_unique_id
+        data_tests: [not_null]
+      - name: customer_state
+        data_tests: [not_null]
+
+  - name: stg_order_items
+    description: One row per unit of product in an order.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [order_id, order_item_id]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "price > 0 and freight_value >= 0"
+    columns:
+      - name: order_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: product_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+      - name: seller_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_sellers')
+                field: seller_id
+
+  - name: stg_order_payments
+    description: One row per payment of an order.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [order_id, payment_sequential]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "payment_value >= 0"
+    columns:
+      - name: order_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: payment_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [credit_card, boleto, voucher, debit_card, not_defined]
+
+  - name: stg_order_reviews
+    description: One row per review and order.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [review_id, order_id]
+    columns:
+      - name: order_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: review_score
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+
+  - name: stg_products
+    description: One row per product; misspelled source columns renamed.
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+
+  - name: stg_sellers
+    description: One row per seller.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "length(seller_zip_code_prefix) = 5"
+    columns:
+      - name: seller_id
+        data_tests: [unique, not_null]
+
+  - name: stg_geolocation
+    description: Coordinate samples per zip code prefix, at the source grain.
+    data_tests:
+      # Known issue: a few points fall outside Brazil. Reported as a warning, not
+      # a failure; the marts use the median per prefix, which ignores them.
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "latitude between -33.75 and 5.27 and longitude between -73.99 and -34.79"
+          config:
+            severity: warn
+    columns:
+      - name: zip_code_prefix
+        data_tests: [not_null]
