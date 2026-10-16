@@ -131,10 +131,12 @@ models:
     description: Coordinate samples per zip code prefix, at the source grain.
     data_tests:
       # Known issue: a few points fall outside Brazil. Reported as a warning, not
-      # a failure; the marts use the median per prefix, which ignores them.
+      # a failure; int_zip_codes drops them before taking the median per prefix.
       - dbt_utils.expression_is_true:
           arguments:
-            expression: "latitude between -33.75 and 5.27 and longitude between -73.99 and -34.79"
+            expression: >
+              latitude between {{ var('brazil_min_latitude') }} and {{ var('brazil_max_latitude') }}
+              and longitude between {{ var('brazil_min_longitude') }} and {{ var('brazil_max_longitude') }}
           config:
             severity: warn
     columns:

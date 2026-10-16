@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: int_zip_codes
+    description: >
+      One row per zip code prefix used by customers, sellers or geolocation,
+      with the median coordinate of its geolocation points inside Brazil.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: >
+              latitude is null or (
+                latitude between {{ var('brazil_min_latitude') }} and {{ var('brazil_max_latitude') }}
+                and longitude between {{ var('brazil_min_longitude') }} and {{ var('brazil_max_longitude') }}
+              )
+    columns:
+      - name: zip_code_prefix
+        data_tests: [unique, not_null]
+      - name: latitude
+        description: Null when the prefix has no geolocation point inside Brazil.
+      - name: source_points
+        description: How many geolocation points inside Brazil the median was taken from (0 if none).
