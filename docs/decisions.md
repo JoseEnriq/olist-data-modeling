@@ -82,7 +82,7 @@ Na origem, `customers` tem uma linha por `customer_id`, mas `customer_id` é ún
 ### 3. A geolocalização vira uma tabela de prefixos de CEP
 A geolocalização tem cerca de um milhão de pontos para 19.015 prefixos, com 261.831 linhas duplicadas, e 8.556 prefixos aparecem com mais de uma grafia de cidade (ex.: "são paulo" e "sao paulo").
 
-- **Escolha:** `zip_codes` com uma linha por prefixo e a **mediana** de latitude e longitude. A mediana é menos sensível a pontos fora do lugar do que a média.
+- **Escolha:** `zip_codes` com uma linha por prefixo e a **mediana** de latitude e longitude. A mediana é menos sensível a pontos fora do lugar do que a média. Na implementação, descobri que isso não bastava para alguns prefixos e que os pontos fora do Brasil precisam sair antes (decisão 25).
 - O conjunto de prefixos é a união dos que aparecem em clientes, vendedores e geolocalização. Assim, os 157 prefixos de clientes e os 7 de vendedores que faltam na geolocalização continuam existindo, com coordenadas nulas, e nenhuma chave estrangeira fica órfã.
 - Não uso cidade e estado da geolocalização: as grafias variam demais.
 
@@ -213,7 +213,29 @@ Os modelos de staging são views: são baratos de recriar e ninguém consulta di
 ### 24. Testes na origem e no staging
 Antes de modelar, os testes confirmam o que a exploração encontrou: chaves únicas (simples e compostas), valores aceitos para status, tipo de pagamento e nota, e nenhuma chave órfã entre itens, pedidos, produtos, vendedores, pagamentos e avaliações.
 
-Um teste fica como **alerta**, e não como falha: 42 pontos da geolocalização, em 21 prefixos, estão fora do território brasileiro. Eles não são removidos no staging, porque a mediana por prefixo (decisão 3) já os ignora, e o alerta deixa o problema visível a cada execução.
+Um teste fica como **alerta**, e não como falha: 42 pontos da geolocalização, em 21 prefixos, estão fora do território brasileiro. Eles não são removidos no staging, que não muda o grão; o tratamento acontece na camada intermediária (decisão 25), e o alerta deixa o problema visível a cada execução.
+
+### 25. Pontos fora do Brasil saem antes da mediana (correção)
+Na decisão 24 eu supus que a mediana por prefixo ignoraria os 42 pontos fora do Brasil. Ao construir `int_zip_codes`, a verificação mostrou que **8 prefixos** ainda ficavam com a mediana fora do país: neles, a maioria dos pontos está errada, e a mediana só ignora erros quando eles são minoria. A correção foi descartar os pontos fora dos limites do território **antes** de calcular a mediana. Com isso, 5 prefixos ficaram sem nenhum ponto válido e passaram a ter coordenada nula, que é melhor do que uma coordenada errada.
+
+Os limites do Brasil ficam num lugar só (`vars` em `dbt/dbt_project.yml`) e são usados pelo modelo, pelo teste de alerta do staging e pelo relatório de validação.
+
+### 26. Camada intermediária para não repetir lógica
+Dois modelos `int_` alimentam os marts:
+- `int_zip_codes`: um ponto por prefixo de CEP (decisões 3 e 25), usado por `dim_location` e `dim_seller`;
+- `int_orders`: o pedido já com `customer_key` e `delivery_location_key`, usado pelos quatro fatos.
+
+Sem ela, a junção de pedido com cliente apareceria repetida em cada fato, e uma correção teria que ser feita em quatro lugares.
+
+### 27. Chaves dos fatos calculadas sem juntar com as dimensões
+Como a chave substituta é o hash da chave natural (decisão 16), o fato calcula `product_key` direto a partir do `product_id`, sem precisar consultar `dim_product`. A garantia de que a chave existe na dimensão vem dos testes de relacionamento: se algum fato apontar para uma chave inexistente, o `dbt build` falha.
+
+### 28. "Entregue" é ter data de entrega, não o status
+Ao construir `fct_orders`, encontrei 8 pedidos com status `delivered` e sem data de entrega, e 6 com data de entrega e outro status. Defini `is_delivered` pela **data de entrega**: é o fato registrado, e é dela que saem os prazos (`days_to_deliver`, `days_late_vs_estimate`, `is_late`). O status continua no fato para quem quiser filtrar por ele. Assim, um pedido nunca aparece como "entregue" sem ter prazo calculável.
+
+### 29. Validação em duas camadas
+- **Testes do dbt** que impedem o build de passar com erro: chaves únicas e não nulas, relacionamentos de todos os fatos com as dimensões, valores aceitos, e três testes de reconciliação (`dbt/tests/`) que comparam contagens e somas em reais dos fatos com os CSVs originais. A reconciliação de `fct_orders` é a prova de que não há fan-out: a soma dos totais por pedido é igual à soma das tabelas de itens e de pagamentos.
+- **Relatório** ([validation.md](validation.md)), gerado por `scripts/validate_marts.py`, que registra os números por trás desses testes e os problemas conhecidos que ficaram no modelo de propósito.
 
 ## O que ficou de fora
 - **Tradução das categorias:** os valores ficam em português (decisão 7).
