@@ -40,3 +40,26 @@ models:
         data_tests: [unique, not_null]
       - name: latitude
         description: Median of the prefix's geolocation points inside Brazil; null if there is none.
+
+  - name: dim_product
+    description: One row per product, with the category flattened in (Portuguese values).
+    columns:
+      - name: product_key
+        description: Hash of product_id.
+        data_tests: [unique, not_null]
+      - name: product_id
+        data_tests: [unique, not_null]
+      - name: product_category_name
+        description: Category in Portuguese; "sem_categoria" when the source has none.
+        data_tests: [not_null]
+
+  - name: dim_seller
+    description: One row per seller, with the location flattened in.
+    columns:
+      - name: seller_key
+        description: Hash of seller_id.
+        data_tests: [unique, not_null]
+      - name: seller_id
+        data_tests: [unique, not_null]
+      - name: seller_state
+        data_tests: [not_null]
