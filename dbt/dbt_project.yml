@@ -7,6 +7,13 @@ analysis-paths: ["analyses"]
 test-paths: ["tests"]
 macro-paths: ["macros"]
 
+vars:
+  # Bounding box of Brazil, used to spot geolocation points that are clearly wrong.
+  brazil_min_latitude: -33.75
+  brazil_max_latitude: 5.27
+  brazil_min_longitude: -73.99
+  brazil_max_longitude: -34.79
+
 clean-targets:
   - target
   - dbt_packages
@@ -15,6 +22,9 @@ models:
   olist:
     # Staging is a thin, typed layer over the raw files: cheap to rebuild as views.
     staging:
+      +materialized: view
+    # Intermediate steps feed the marts; nobody queries them directly.
+    intermediate:
       +materialized: view
     # Marts are what people query, so they are stored as tables.
     marts:
