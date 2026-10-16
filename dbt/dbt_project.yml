@@ -8,6 +8,9 @@ test-paths: ["tests"]
 macro-paths: ["macros"]
 
 vars:
+  # Range of dim_date: whole years covering every purchase, milestone and review.
+  dim_date_start: "2016-01-01"
+  dim_date_end: "2018-12-31"
   # Bounding box of Brazil, used to spot geolocation points that are clearly wrong.
   brazil_min_latitude: -33.75
   brazil_max_latitude: 5.27

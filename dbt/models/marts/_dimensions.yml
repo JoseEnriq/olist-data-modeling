@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: One row per day, 2016 to 2018. Used in several roles by the facts.
+    columns:
+      - name: date_key
+        description: Integer YYYYMMDD.
+        data_tests: [unique, not_null]
+      - name: date
+        data_tests: [unique, not_null]
+      - name: day_of_week
+        description: ISO numbering, 1 = Monday ... 7 = Sunday.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7]
+                quote: false
+
+  - name: dim_customer
+    description: One row per person (customer_unique_id), with first purchase and cohort month. SCD type 1.
+    columns:
+      - name: customer_key
+        description: Hash of customer_unique_id.
+        data_tests: [unique, not_null]
+      - name: customer_unique_id
+        data_tests: [unique, not_null]
+      - name: first_purchased_at
+        data_tests: [not_null]
+
+  - name: dim_location
+    description: Delivery address as typed in the order, one row per zip prefix + city + state.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [zip_code_prefix, city, state]
+    columns:
+      - name: location_key
+        description: Hash of zip_code_prefix, city and state.
+        data_tests: [unique, not_null]
+      - name: latitude
+        description: Median of the prefix's geolocation points inside Brazil; null if there is none.
