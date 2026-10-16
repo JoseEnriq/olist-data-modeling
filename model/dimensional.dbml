@@ -113,8 +113,8 @@ Table fct_orders {
   payment_total decimal(10, 2) [not null]
   hours_to_approve decimal(10, 2)
   days_to_deliver decimal(10, 2) [note: 'Da compra até a entrega ao cliente.']
-  days_late_vs_estimate decimal(10, 2) [note: 'Entrega menos data prevista; positivo = atrasou.']
-  is_delivered boolean [not null]
+  days_late_vs_estimate int [note: 'Dias inteiros entre a data prevista e a data de entrega; positivo = atrasou.']
+  is_delivered boolean [not null, note: 'Verdadeiro quando há data de entrega (não depende do status).']
   is_late boolean [note: 'Nulo quando o pedido não foi entregue.']
 
   Note: 'Accumulating snapshot. Grão: um pedido, com uma coluna de data para cada etapa do ciclo. Datas nulas = etapa ainda não aconteceu.'

@@ -88,7 +88,7 @@ erDiagram
         decimal payment_total
         decimal hours_to_approve
         decimal days_to_deliver
-        decimal days_late_vs_estimate
+        int days_late_vs_estimate
         boolean is_delivered
         boolean is_late
     }
