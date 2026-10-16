@@ -1,6 +1,16 @@
 version: 2
 
 models:
+  - name: int_orders
+    description: Orders with customer_key and delivery_location_key, shared by the facts.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_key
+        data_tests: [not_null]
+      - name: delivery_location_key
+        data_tests: [not_null]
+
   - name: int_zip_codes
     description: >
       One row per zip code prefix used by customers, sellers or geolocation,
