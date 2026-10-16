@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: fct_order_items
+    description: "Transactional fact. Grain: one unit of product sold in an order."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [order_id, order_item_id]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "price > 0 and freight_value >= 0"
+    columns:
+      - name: order_id
+        description: Degenerate dimension.
+        data_tests: [not_null]
+      - name: customer_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_customer'), field: customer_key}
+      - name: delivery_location_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_location'), field: location_key}
+      - name: product_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_product'), field: product_key}
+      - name: seller_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_seller'), field: seller_key}
+      - name: purchase_date_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+
+  - name: fct_orders
+    description: "Accumulating snapshot. Grain: one order, with one date key per milestone."
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "items_count >= 0 and items_price_total >= 0 and payment_total >= 0"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "(is_late is null) = (not is_delivered)"
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_customer'), field: customer_key}
+      - name: delivery_location_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_location'), field: location_key}
+      - name: purchase_date_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+      - name: approved_date_key
+        description: Null when the payment was never approved.
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+      - name: delivered_to_carrier_date_key
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+      - name: delivered_to_customer_date_key
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+      - name: estimated_delivery_date_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+      - name: days_late_vs_estimate
+        description: Delivery date minus estimated date, in whole days; positive means late.
+      - name: is_delivered
+        description: True when there is a delivery date (not based on order_status).
+        data_tests: [not_null]
+      - name: is_late
+        description: Null when the order was not delivered.
