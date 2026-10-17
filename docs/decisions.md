@@ -178,7 +178,7 @@ Por que ter chave substituta se já existe `product_id`? Ela isola o modelo da o
 ### 18. Avaliações no grão avaliação × pedido
 `fct_reviews` tem 99.224 linhas para 98.410 avaliações, porque 789 avaliações cobrem mais de um pedido. Escolhi esse grão porque a pergunta mais comum é "qual a nota deste pedido?". A regra para quem consulta: média de nota **por pedido** usa as linhas como estão; contagem de **avaliações** usa `count(distinct review_id)`.
 
-Limitação conhecida: a nota é do pedido, não do vendedor. Em 1.278 pedidos há mais de um vendedor, então atribuir a nota a um vendedor exige uma regra. A decisão fica para a etapa das consultas, junto com a consulta que usa a nota por vendedor.
+Limitação conhecida: a nota é do pedido, não do vendedor. Em 1.278 pedidos há mais de um vendedor, então atribuir a nota a um vendedor exige uma regra. A decisão fica para a etapa das consultas, junto com a consulta que usa a nota por vendedor (resolvida na decisão 33).
 
 ### 19. `dim_date` de 2016 a 2018
 A dimensão cobre os anos completos de 2016 a 2018, o que inclui todas as datas de compra, etapas do pedido e avaliações (a última é de 29/10/2018). A exceção é `shipping_limit_at`: 4 itens têm prazo de postagem em 2020, o que parece erro de cadastro. Por isso essa data fica só como timestamp no fato, sem chave de data.
@@ -236,6 +236,33 @@ Ao construir `fct_orders`, encontrei 8 pedidos com status `delivered` e sem data
 ### 29. Validação em duas camadas
 - **Testes do dbt** que impedem o build de passar com erro: chaves únicas e não nulas, relacionamentos de todos os fatos com as dimensões, valores aceitos, e três testes de reconciliação (`dbt/tests/`) que comparam contagens e somas em reais dos fatos com os CSVs originais. A reconciliação de `fct_orders` é a prova de que não há fan-out: a soma dos totais por pedido é igual à soma das tabelas de itens e de pagamentos.
 - **Relatório** ([validation.md](validation.md)), gerado por `scripts/validate_marts.py`, que registra os números por trás desses testes e os problemas conhecidos que ficaram no modelo de propósito.
+
+## Definições das métricas de negócio
+
+As 10 consultas ficam em `dbt/analyses/`, e os resultados em [results.md](results.md), gerado por `scripts/export_results.py`. Antes de escrever qualquer consulta, defini o que cada métrica significa, porque o mesmo nome ("receita", "entregue", "nota do vendedor") pode dar números bem diferentes conforme a regra.
+
+### 30. Pedido válido e receita
+**Pedido válido** é o que não ficou `canceled` (625) nem `unavailable` (609): são pedidos que não viraram venda. **Receita** é a soma dos preços dos itens dos pedidos válidos, **sem frete**. O frete é custo de entrega, e misturá-lo com a receita dos produtos distorceria a comparação entre categorias, já que produtos pesados têm frete maior.
+
+### 31. Período das séries no tempo
+Séries mensais e trimestrais vão de janeiro de 2017 a agosto de 2018. As pontas do dataset quase não têm pedidos (ver [exploration.md](exploration.md), descoberta 7), e incluí-las mostraria quedas que não aconteceram.
+
+### 32. Ticket é o que o cliente pagou, com média e mediana
+O **ticket** de um pedido é o valor efetivamente pago (`payment_total`), que inclui frete e juros de parcelamento. É a visão do cliente, diferente da receita por produto da decisão 30. A mediana aparece ao lado da média porque alguns pedidos muito caros puxam a média para cima.
+
+### 33. Nota por vendedor: só pedidos de um vendedor
+A avaliação é do pedido, não do vendedor (decisão 18). Considerei três regras:
+- **dar a nota a todos os vendedores do pedido:** descartada, porque um vendedor ruim "contaminaria" a nota dos outros;
+- **dividir a nota pelo valor de cada vendedor no pedido:** descartada por ser difícil de explicar e de auditar;
+- **usar só pedidos com um único vendedor:** a escolhida. Os 1.278 pedidos com mais de um vendedor ficam de fora dessa métrica, uma parcela pequena do total.
+
+Pedidos com mais de uma avaliação contam uma vez só, com a média delas. Vendedores precisam de pelo menos 50 pedidos avaliados para entrar no ranking.
+
+### 34. Amostras mínimas
+Taxas calculadas sobre poucos casos variam demais com um ou dois pedidos. Por isso o percentual de atraso por estado considera só estados com pelo menos 500 pedidos entregues, e o ranking de vendedores exige 50 pedidos avaliados. Os cortes estão escritos no topo de cada consulta.
+
+### 35. Consultas como `analyses` do dbt
+As consultas ficam em `dbt/analyses/` e usam `ref()`, como os modelos. Assim, o dbt confere que todas as tabelas citadas existem e compila tudo com os nomes certos. Elas não viram tabelas: são lidas pelo `export_results.py`, que executa cada uma e grava o resultado. Nenhum número dos READMEs é digitado à mão.
 
 ## O que ficou de fora
 - **Tradução das categorias:** os valores ficam em português (decisão 7).
