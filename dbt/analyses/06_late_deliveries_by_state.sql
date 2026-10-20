@@ -19,4 +19,4 @@ inner join {{ ref('dim_location') }} as locations
 where orders.is_delivered
 group by locations.state
 having count(*) >= 500
-order by late_pct desc
+order by late_pct desc, locations.state
