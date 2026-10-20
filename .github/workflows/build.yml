@@ -1,0 +1,48 @@
+name: build
+
+# Rebuild everything from scratch on a clean machine: download the data, run
+# dbt with all tests, regenerate the reports and check they match the ones
+# committed. If a model changes and the reports were not regenerated, this fails.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  dbt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # The dataset does not change, so it is downloaded once and reused.
+      - name: Restore the Olist data
+        uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: olist-raw-${{ hashFiles('scripts/download_data.py') }}
+
+      - name: Download the data
+        run: python scripts/download_data.py
+
+      - name: Build and test the models
+        working-directory: dbt
+        run: |
+          dbt deps
+          dbt build
+
+      - name: Regenerate the reports
+        run: |
+          python scripts/validate_marts.py
+          python scripts/export_results.py
+
+      - name: Check the committed reports are up to date
+        run: git diff --exit-code docs/
