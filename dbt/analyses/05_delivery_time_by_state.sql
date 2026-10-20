@@ -14,4 +14,4 @@ inner join {{ ref('dim_location') }} as locations
 
 where orders.is_delivered
 group by locations.state
-order by median_days
+order by median_days, locations.state

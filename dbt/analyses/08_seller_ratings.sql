@@ -42,8 +42,8 @@ ranked as (
 
     select
         seller_scores.*,
-        row_number() over (order by average_score desc, reviewed_orders desc) as best_rank,
-        row_number() over (order by average_score asc, reviewed_orders desc)  as worst_rank
+        row_number() over (order by average_score desc, reviewed_orders desc, seller_key) as best_rank,
+        row_number() over (order by average_score asc, reviewed_orders desc, seller_key)  as worst_rank
 
     from seller_scores
 
@@ -62,4 +62,4 @@ inner join {{ ref('dim_seller') }} as sellers
     on ranked.seller_key = sellers.seller_key
 
 where ranked.best_rank <= 10 or ranked.worst_rank <= 10
-order by ranked.average_score desc
+order by ranked.average_score desc, ranked.reviewed_orders desc, sellers.seller_id

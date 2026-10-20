@@ -13,4 +13,4 @@ select
 
 from {{ ref('fct_payments') }}
 group by payment_type
-order by payments desc
+order by payments desc, payment_type

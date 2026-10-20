@@ -25,7 +25,7 @@ ranked as (
         revenue,
         -- Share of the total revenue, in percent (computed before keeping the top 10).
         round(100 * revenue / sum(revenue) over (), 1) as revenue_share_pct,
-        row_number() over (order by revenue desc)      as revenue_rank
+        row_number() over (order by revenue desc, product_category_name) as revenue_rank
 
     from category_revenue
 
