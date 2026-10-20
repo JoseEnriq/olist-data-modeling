@@ -57,5 +57,6 @@ Problemas conhecidos dos dados, mantidos no modelo de propósito. As decisões e
 | Avaliações que cobrem mais de um pedido | 789 |
 | Produtos sem categoria (rótulo sem_categoria) | 610 |
 | Pontos de geolocalização fora do Brasil (descartados antes da mediana) | 42 |
+| Prefixos cuja mediana cairia fora do Brasil sem descartar esses pontos antes | 8 |
 | Endereços de entrega sem coordenada | 158 |
 | Vendedores sem coordenada | 7 |
