@@ -1,5 +1,7 @@
 # Olist data modeling
 
+[![build](https://github.com/JoseEnriq/olist-data-modeling/actions/workflows/build.yml/badge.svg)](https://github.com/JoseEnriq/olist-data-modeling/actions/workflows/build.yml)
+
 **English** | [Português](README.pt-BR.md)
 
 I took the public Olist e-commerce dataset and modeled it end to end: from nine raw CSV files to a tested star schema that answers business questions in a few lines of SQL. The focus is the reasoning behind each modeling decision, written down with the alternatives I rejected.
