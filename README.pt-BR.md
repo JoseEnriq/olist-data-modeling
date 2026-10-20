@@ -36,6 +36,8 @@ Desenhei duas vezes. O [modelo normalizado](model/normalized.md) mostra como os 
 
 Eles compartilham cinco dimensões: data, cliente, local de entrega, produto e vendedor.
 
+![Star schema: quatro fatos no centro e cinco dimensões em volta](model/dimensional.svg)
+
 ## Principais decisões
 
 As 35 estão em [docs/decisions.md](docs/decisions.md). As que mais pesaram:

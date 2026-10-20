@@ -1,0 +1,115 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1000' height='888' viewBox='0 0 1000 888'>
+<rect width='1000' height='888' rx='12' fill='#ffffff'/>
+<line x1='380.0' y1='188.7' x2='280.0' y2='488.4' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='620.0' y1='203.0' x2='720.0' y2='548.4' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='380.0' y1='131.3' x2='280.0' y2='221.3' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='620.0' y1='117.0' x2='720.0' y2='130.0' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='620.0' y1='160.0' x2='720.0' y2='300.0' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='380.0' y1='436.0' x2='280.0' y2='502.8' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='620.0' y1='404.0' x2='720.0' y2='562.8' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='380.0' y1='372.0' x2='280.0' y2='238.7' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='380.0' y1='618.0' x2='280.0' y2='517.2' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='620.0' y1='618.0' x2='720.0' y2='577.2' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='380.0' y1='792.0' x2='280.0' y2='531.6' stroke='#94a3b8' stroke-width='1.5'/>
+<line x1='620.0' y1='792.0' x2='720.0' y2='591.6' stroke='#94a3b8' stroke-width='1.5'/>
+<rect x='380' y='40' width='240' height='206' rx='8' fill='#f8fafc' stroke='#1d4ed8' stroke-width='1.5'/>
+<path d='M380,48 a8,8 0 0 1 8,-8 h224 a8,8 0 0 1 8,8 v26 h-240 z' fill='#1d4ed8'/>
+<text x='392' y='62' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='14' font-weight='600' fill='#ffffff'>fct_order_items</text>
+<text x='392' y='90' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>order_id</text>
+<text x='608' y='90' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>PK</text>
+<text x='392' y='110' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>order_item_id</text>
+<text x='608' y='110' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>PK</text>
+<text x='392' y='130' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>customer_key</text>
+<text x='608' y='130' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='150' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>delivery_location_key</text>
+<text x='608' y='150' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='170' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>product_key</text>
+<text x='608' y='170' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='190' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>seller_key</text>
+<text x='608' y='190' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='210' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>purchase_date_key</text>
+<text x='608' y='210' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='230' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#64748b' font-style='italic'>+4</text>
+<rect x='380' y='274' width='240' height='226' rx='8' fill='#f8fafc' stroke='#1d4ed8' stroke-width='1.5'/>
+<path d='M380,282 a8,8 0 0 1 8,-8 h224 a8,8 0 0 1 8,8 v26 h-240 z' fill='#1d4ed8'/>
+<text x='392' y='296' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='14' font-weight='600' fill='#ffffff'>fct_orders</text>
+<text x='392' y='324' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>order_id</text>
+<text x='608' y='324' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>PK</text>
+<text x='392' y='344' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>customer_key</text>
+<text x='608' y='344' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='364' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>delivery_location_key</text>
+<text x='608' y='364' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='384' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>purchase_date_key</text>
+<text x='608' y='384' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='404' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>approved_date_key</text>
+<text x='608' y='404' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='424' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>delivered_to_carrier_date_key</text>
+<text x='608' y='424' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='444' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>delivered_to_customer_date_key</text>
+<text x='608' y='444' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='464' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>estimated_delivery_date_key</text>
+<text x='608' y='464' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='484' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#64748b' font-style='italic'>+15</text>
+<rect x='380' y='528' width='240' height='146' rx='8' fill='#f8fafc' stroke='#1d4ed8' stroke-width='1.5'/>
+<path d='M380,536 a8,8 0 0 1 8,-8 h224 a8,8 0 0 1 8,8 v26 h-240 z' fill='#1d4ed8'/>
+<text x='392' y='550' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='14' font-weight='600' fill='#ffffff'>fct_payments</text>
+<text x='392' y='578' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>order_id</text>
+<text x='608' y='578' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>PK</text>
+<text x='392' y='598' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>payment_sequential</text>
+<text x='608' y='598' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>PK</text>
+<text x='392' y='618' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>customer_key</text>
+<text x='608' y='618' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='638' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>purchase_date_key</text>
+<text x='608' y='638' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='658' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#64748b' font-style='italic'>+3</text>
+<rect x='380' y='702' width='240' height='146' rx='8' fill='#f8fafc' stroke='#1d4ed8' stroke-width='1.5'/>
+<path d='M380,710 a8,8 0 0 1 8,-8 h224 a8,8 0 0 1 8,8 v26 h-240 z' fill='#1d4ed8'/>
+<text x='392' y='724' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='14' font-weight='600' fill='#ffffff'>fct_reviews</text>
+<text x='392' y='752' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>review_id</text>
+<text x='608' y='752' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>PK</text>
+<text x='392' y='772' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>order_id</text>
+<text x='608' y='772' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>PK</text>
+<text x='392' y='792' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>customer_key</text>
+<text x='608' y='792' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='812' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>review_created_date_key</text>
+<text x='608' y='812' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#1d4ed8' text-anchor='end'>FK</text>
+<text x='392' y='832' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#64748b' font-style='italic'>+3</text>
+<rect x='40' y='170' width='240' height='86' rx='8' fill='#f8fafc' stroke='#0f766e' stroke-width='1.5'/>
+<path d='M40,178 a8,8 0 0 1 8,-8 h224 a8,8 0 0 1 8,8 v26 h-240 z' fill='#0f766e'/>
+<text x='52' y='192' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='14' font-weight='600' fill='#ffffff'>dim_location</text>
+<text x='52' y='220' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>location_key</text>
+<text x='268' y='220' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#0f766e' text-anchor='end'>PK</text>
+<text x='52' y='240' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#64748b' font-style='italic'>+5</text>
+<rect x='40' y='440' width='240' height='106' rx='8' fill='#f8fafc' stroke='#0f766e' stroke-width='1.5'/>
+<path d='M40,448 a8,8 0 0 1 8,-8 h224 a8,8 0 0 1 8,8 v26 h-240 z' fill='#0f766e'/>
+<text x='52' y='462' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='14' font-weight='600' fill='#ffffff'>dim_customer</text>
+<text x='52' y='490' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>customer_key</text>
+<text x='268' y='490' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#0f766e' text-anchor='end'>PK</text>
+<text x='52' y='510' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>customer_unique_id</text>
+<text x='268' y='510' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#0f766e' text-anchor='end'>UK</text>
+<text x='52' y='530' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#64748b' font-style='italic'>+2</text>
+<rect x='720' y='60' width='240' height='106' rx='8' fill='#f8fafc' stroke='#0f766e' stroke-width='1.5'/>
+<path d='M720,68 a8,8 0 0 1 8,-8 h224 a8,8 0 0 1 8,8 v26 h-240 z' fill='#0f766e'/>
+<text x='732' y='82' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='14' font-weight='600' fill='#ffffff'>dim_product</text>
+<text x='732' y='110' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>product_key</text>
+<text x='948' y='110' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#0f766e' text-anchor='end'>PK</text>
+<text x='732' y='130' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>product_id</text>
+<text x='948' y='130' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#0f766e' text-anchor='end'>UK</text>
+<text x='732' y='150' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#64748b' font-style='italic'>+8</text>
+<rect x='720' y='230' width='240' height='106' rx='8' fill='#f8fafc' stroke='#0f766e' stroke-width='1.5'/>
+<path d='M720,238 a8,8 0 0 1 8,-8 h224 a8,8 0 0 1 8,8 v26 h-240 z' fill='#0f766e'/>
+<text x='732' y='252' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='14' font-weight='600' fill='#ffffff'>dim_seller</text>
+<text x='732' y='280' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>seller_key</text>
+<text x='948' y='280' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#0f766e' text-anchor='end'>PK</text>
+<text x='732' y='300' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>seller_id</text>
+<text x='948' y='300' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#0f766e' text-anchor='end'>UK</text>
+<text x='732' y='320' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#64748b' font-style='italic'>+5</text>
+<rect x='720' y='500' width='240' height='106' rx='8' fill='#f8fafc' stroke='#0f766e' stroke-width='1.5'/>
+<path d='M720,508 a8,8 0 0 1 8,-8 h224 a8,8 0 0 1 8,8 v26 h-240 z' fill='#0f766e'/>
+<text x='732' y='522' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='14' font-weight='600' fill='#ffffff'>dim_date</text>
+<text x='732' y='550' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>date_key</text>
+<text x='948' y='550' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#0f766e' text-anchor='end'>PK</text>
+<text x='732' y='570' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#0f172a'>date</text>
+<text x='948' y='570' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='10' font-weight='600' fill='#0f766e' text-anchor='end'>UK</text>
+<text x='732' y='590' font-family='Segoe UI, Helvetica, Arial, sans-serif' font-size='12' fill='#64748b' font-style='italic'>+9</text>
+</svg>

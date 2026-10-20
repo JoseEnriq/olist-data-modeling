@@ -6,6 +6,7 @@
 | [dimensional.dbml](dimensional.dbml) | Star schema, fonte da verdade |
 | [normalized.md](normalized.md) | Diagrama do modelo normalizado, gerado a partir do `.dbml` |
 | [dimensional.md](dimensional.md) | Diagrama do star schema, gerado a partir do `.dbml` |
+| [dimensional.svg](dimensional.svg) | Imagem do star schema (só as chaves), gerada a partir do `.dbml`; é a usada no README |
 
 As justificativas de cada tabela e relacionamento estão em [docs/decisions.md](../docs/decisions.md).
 
@@ -17,7 +18,10 @@ Para atualizar os diagramas depois de mudar um `.dbml`:
 
 ```bash
 python scripts/render_diagrams.py
+python scripts/render_star_schema.py
 ```
+
+O primeiro gera os `.md` com Mermaid; o segundo, a imagem `dimensional.svg`, com os fatos no centro e as dimensões em volta.
 
 ## Ver e exportar no dbdiagram.io
 

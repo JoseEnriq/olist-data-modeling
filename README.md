@@ -36,6 +36,8 @@ I designed it twice. The [normalized model](model/normalized.md) shows how the s
 
 They share five dimensions: date, customer, delivery location, product and seller.
 
+![Star schema: four facts in the middle, five dimensions around them](model/dimensional.svg)
+
 ## Key decisions
 
 All 35 are in [docs/decisions.md](docs/decisions.md). The ones that mattered most:
