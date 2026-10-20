@@ -21,6 +21,8 @@ data/raw/*.csv ──► staging (stg_*) ──► intermediate (int_*) ──�
 
 The transformations run in [dbt](https://www.getdbt.com/) on a local [DuckDB](https://duckdb.org/) file, which reads the CSVs directly. Staging only types and renames; joins and aggregations happen later, so every number can be traced back to a source row. Each step was designed in [docs/](docs/) before being built.
 
+Each step was built in its own branch and merged through a pull request: small, single-topic PRs were squashed, and larger ones were rebased to keep their commits separate.
+
 ## The model
 
 I designed it twice. The [normalized model](model/normalized.md) shows how the source data relates in third normal form. The [star schema](model/dimensional.md) reorganizes it for analysis, with four facts at different grains so nothing is counted twice:
