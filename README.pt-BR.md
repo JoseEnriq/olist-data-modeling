@@ -1,5 +1,7 @@
 # Modelagem de dados da Olist
 
+[![build](https://github.com/JoseEnriq/olist-data-modeling/actions/workflows/build.yml/badge.svg)](https://github.com/JoseEnriq/olist-data-modeling/actions/workflows/build.yml)
+
 [English](README.md) | **Português**
 
 Peguei o dataset público de e-commerce da Olist e fiz a modelagem de ponta a ponta: de nove arquivos CSV brutos até um star schema testado, que responde perguntas de negócio com poucas linhas de SQL. O foco é o raciocínio por trás de cada decisão de modelagem, registrado junto com as alternativas que descartei.
