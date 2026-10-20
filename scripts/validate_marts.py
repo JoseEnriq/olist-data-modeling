@@ -107,6 +107,15 @@ ATTENTION_POINTS = [
                         between {BRAZIL['brazil_min_latitude']} and {BRAZIL['brazil_max_latitude']}
                 and cast(geolocation_lng as double)
                         between {BRAZIL['brazil_min_longitude']} and {BRAZIL['brazil_max_longitude']})"""),
+    ("Prefixos cuja mediana cairia fora do Brasil sem descartar esses pontos antes",
+     f"""select count(*) from (
+             select geolocation_zip_code_prefix,
+                    median(cast(geolocation_lat as double)) as latitude,
+                    median(cast(geolocation_lng as double)) as longitude
+             from {GEOLOCATION} group by 1
+         )
+         where not (latitude between {BRAZIL['brazil_min_latitude']} and {BRAZIL['brazil_max_latitude']}
+                and longitude between {BRAZIL['brazil_min_longitude']} and {BRAZIL['brazil_max_longitude']})"""),
     ("Endereços de entrega sem coordenada", "select count(*) from dim_location where latitude is null"),
     ("Vendedores sem coordenada", "select count(*) from dim_seller where latitude is null"),
 ]
