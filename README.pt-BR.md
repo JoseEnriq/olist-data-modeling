@@ -4,7 +4,7 @@
 
 [English](README.md) | **Português**
 
-Peguei o dataset público de e-commerce da Olist e fiz a modelagem de ponta a ponta: de nove arquivos CSV brutos até um star schema testado, que responde perguntas de negócio com poucas linhas de SQL. O foco é o raciocínio por trás de cada decisão de modelagem, registrado junto com as alternativas que descartei.
+Montei um banco de dados analítico local para o dataset público de e-commerce da Olist: o dbt carrega nove arquivos CSV brutos no DuckDB, testa e modela tudo num star schema que responde perguntas de negócio com poucas linhas de SQL. O foco é o raciocínio por trás de cada decisão de modelagem, registrado junto com as alternativas que descartei.
 
 ## O problema
 
@@ -21,9 +21,9 @@ data/raw/*.csv ──► staging (stg_*) ──► intermediate (int_*) ──�
                    tipos e nomes       passos reaproveitados    o que as pessoas consultam
 ```
 
-As transformações rodam no [dbt](https://www.getdbt.com/), sobre um arquivo local do [DuckDB](https://duckdb.org/), que lê os CSVs direto. O staging só converte tipos e renomeia; junções e agregações acontecem depois, para que qualquer número possa ser rastreado até uma linha da origem. Cada etapa foi desenhada em [docs/](docs/) antes de ser construída.
+Cada camada é um conjunto de tabelas num único arquivo do [DuckDB](https://duckdb.org/), um banco analítico que roda sem servidor e lê os CSVs direto; o [dbt](https://www.getdbt.com/) constrói e testa essas tabelas. O staging só converte tipos e renomeia; junções e agregações acontecem depois, para que qualquer número possa ser rastreado até uma linha da origem. Scripts em Python baixam os dados, conferem os marts contra a origem e exportam os relatórios. A cada Pull Request, o GitHub Actions reconstrói o banco do zero, roda todos os testes e falha se os relatórios commitados estiverem desatualizados.
 
-Cada etapa foi feita numa branch própria e entrou por Pull Request: os PRs pequenos, de um assunto só, entraram com squash, e os maiores com rebase, para manter os commits separados.
+Cada etapa foi desenhada em [docs/](docs/), feita numa branch própria e entrou por Pull Request.
 
 ## O modelo
 
@@ -60,7 +60,7 @@ De [docs/results.md](docs/results.md), gerado pelo `scripts/export_results.py`; 
 
 ## O que ficou de fora
 
-O projeto cobre modelagem e transformação. Ingestão a partir de sistemas de origem, carga incremental, agendamento com um orquestrador e um data warehouse na nuvem são o próximo passo, que pretendo construir sobre este modelo num projeto separado. As categorias não foram traduzidas para o inglês, de propósito.
+O projeto cobre modelagem e transformação num banco local. Ingestão de fontes vivas, carga incremental, orquestração e nuvem ficam fora do escopo.
 
 ## Como reproduzir
 
