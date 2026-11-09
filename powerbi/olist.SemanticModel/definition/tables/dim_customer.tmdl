@@ -1,0 +1,40 @@
+/// One row per person (customer_unique_id), not per order: customer_id changes with every order.
+table dim_customer
+	lineageTag: b1b6a88d-94f6-45aa-b937-c8973889322b
+
+	column customer_key
+		dataType: string
+		isHidden
+		lineageTag: bf7020b9-748c-405d-b50a-7d4e39db5a29
+		summarizeBy: none
+		sourceColumn: customer_key
+
+	column customer_unique_id
+		dataType: string
+		lineageTag: 7e4bb17e-548d-47fd-a3f6-986e59744800
+		summarizeBy: none
+		sourceColumn: customer_unique_id
+
+	column first_purchased_at
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: 474e17cb-5dfc-4135-9631-e76be5c47f00
+		summarizeBy: none
+		sourceColumn: first_purchased_at
+
+	column cohort_month
+		dataType: string
+		lineageTag: 53b9bc6f-4582-4945-9cba-35214ef5ebdd
+		summarizeBy: none
+		sourceColumn: cohort_month
+
+	partition dim_customer = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\dim_customer.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

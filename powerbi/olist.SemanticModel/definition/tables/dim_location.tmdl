@@ -1,0 +1,51 @@
+/// One row per delivery zip code prefix, with the median point of its coordinates.
+table dim_location
+	lineageTag: 34e9ff42-87e3-477a-afd8-723dc5699e9d
+
+	column location_key
+		dataType: string
+		isHidden
+		lineageTag: 052a8207-d62c-4773-8cb7-be9eb7492c23
+		summarizeBy: none
+		sourceColumn: location_key
+
+	column zip_code_prefix
+		dataType: string
+		lineageTag: ac31a7ec-51dd-4b20-a2f7-79454b630d6c
+		summarizeBy: none
+		sourceColumn: zip_code_prefix
+
+	column city
+		dataType: string
+		lineageTag: d39fa396-5289-45f0-8f24-eb530b6cbae5
+		summarizeBy: none
+		sourceColumn: city
+
+	column state
+		dataType: string
+		lineageTag: 6ac8eb5a-83ea-4f21-b182-9068cc37dc51
+		summarizeBy: none
+		sourceColumn: state
+
+	column latitude
+		dataType: double
+		lineageTag: e7b6ff49-458d-4d1e-aafd-d5a4ac4260b4
+		summarizeBy: none
+		sourceColumn: latitude
+
+	column longitude
+		dataType: double
+		lineageTag: 9b31ddc9-0e3c-45f4-bca1-1dd154f6cf1d
+		summarizeBy: none
+		sourceColumn: longitude
+
+	partition dim_location = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\dim_location.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

@@ -8,7 +8,13 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBI_QueryOrder = ["MartsFolder"]
+annotation PBI_QueryOrder = ["MartsFolder","dim_date","dim_customer","dim_location","dim_product","dim_seller"]
 
 annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_date
+ref table dim_customer
+ref table dim_location
+ref table dim_product
+ref table dim_seller
 

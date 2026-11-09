@@ -1,0 +1,57 @@
+/// One row per seller, with its location flattened in (star, not snowflake).
+table dim_seller
+	lineageTag: e082126d-5183-4a02-ab76-0154aa1e5eb2
+
+	column seller_key
+		dataType: string
+		isHidden
+		lineageTag: 84d78e2c-0a91-43ee-b7b4-5b74f4f4c43f
+		summarizeBy: none
+		sourceColumn: seller_key
+
+	column seller_id
+		dataType: string
+		lineageTag: 78de6958-48c1-44da-8e91-17acb7c656b5
+		summarizeBy: none
+		sourceColumn: seller_id
+
+	column seller_zip_code_prefix
+		dataType: string
+		lineageTag: c3a9ebec-b7f6-4107-97e8-94dc82d1988a
+		summarizeBy: none
+		sourceColumn: seller_zip_code_prefix
+
+	column seller_city
+		dataType: string
+		lineageTag: 6d692e22-8ae8-48c7-9569-844cbc97c949
+		summarizeBy: none
+		sourceColumn: seller_city
+
+	column seller_state
+		dataType: string
+		lineageTag: 1e029c5c-4efe-4a6c-bad8-c1253d76b37f
+		summarizeBy: none
+		sourceColumn: seller_state
+
+	column latitude
+		dataType: double
+		lineageTag: 9964ca1d-485b-4adc-904a-9df14b455dd6
+		summarizeBy: none
+		sourceColumn: latitude
+
+	column longitude
+		dataType: double
+		lineageTag: df7400b0-3c91-4775-bd74-2dcbae623567
+		summarizeBy: none
+		sourceColumn: longitude
+
+	partition dim_seller = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\dim_seller.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
