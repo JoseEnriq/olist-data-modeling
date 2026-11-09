@@ -1,0 +1,6 @@
+/// Folder with the Parquet files written by scripts/export_marts.py. Point it to <repository>\data\marts after cloning (Transform data > Edit parameters).
+expression MartsFolder = "C:\olist-data-modeling\data\marts" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 250fd55d-8ed1-4c1d-8760-7ed793d03391
+
+	annotation PBI_ResultType = Text
+

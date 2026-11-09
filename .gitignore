@@ -8,6 +8,10 @@ data/raw/
 # Marts exported for Power BI (see scripts/export_marts.py)
 data/marts/
 
+# Power BI Desktop local cache and per-user settings
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+
 # dbt artifacts
 dbt/target/
 dbt/logs/
