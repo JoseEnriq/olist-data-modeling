@@ -1,0 +1,206 @@
+/// Report measures. Each one repeats a definition from dbt/analyses, so the report and docs/results.md show the same numbers.
+table Medidas
+	lineageTag: 787ac959-c84a-4b4f-bae9-66bce95b4a4a
+
+	/// Every order in the current filter, whatever its status.
+	measure Pedidos = COUNTROWS(fct_orders)
+		formatString: #,0
+		displayFolder: Pedidos
+		lineageTag: 9430820b-a8c6-4bc2-bb29-a7de59f7babf
+
+	/// Not canceled and not unavailable: the definition of a purchase used in every analysis.
+	measure 'Pedidos válidos' =
+			CALCULATE(
+			    COUNTROWS(fct_orders),
+			    NOT fct_orders[order_status] IN { "canceled", "unavailable" }
+			)
+		formatString: #,0
+		displayFolder: Pedidos
+		lineageTag: f93b633e-6444-441c-86b6-d39f886ee964
+
+	/// Orders with a delivery date. The status is not used: 8 orders are "delivered" without a date.
+	measure 'Pedidos entregues' =
+			CALCULATE(
+			    COUNTROWS(fct_orders),
+			    fct_orders[is_delivered] = TRUE()
+			)
+		formatString: #,0
+		displayFolder: Entrega
+		lineageTag: d25765a6-284b-4b39-9449-a73e5f230f91
+
+	/// Delivered after the estimated date shown to the customer.
+	measure 'Pedidos atrasados' =
+			CALCULATE(
+			    COUNTROWS(fct_orders),
+			    fct_orders[is_late] = TRUE()
+			)
+		formatString: #,0
+		displayFolder: Entrega
+		lineageTag: 08d3d32d-2c87-49f1-bb8e-516bc1909ed1
+
+	measure '% atrasados' = DIVIDE([Pedidos atrasados], [Pedidos entregues])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Entrega
+		lineageTag: f26f64e5-8103-407b-98af-60b9bd8c1b3d
+
+	/// Median, not average: a few very late orders pull the average up (analysis 05).
+	measure 'Dias até a entrega (mediana)' =
+			CALCULATE(
+			    MEDIAN(fct_orders[days_to_deliver]),
+			    fct_orders[is_delivered] = TRUE()
+			)
+		formatString: 0.0
+		displayFolder: Entrega
+		lineageTag: bb566754-2c17-4ff7-997d-fb282c2cd817
+
+	measure 'Dias de atraso (média)' =
+			CALCULATE(
+			    AVERAGE(fct_orders[days_late_vs_estimate]),
+			    fct_orders[is_late] = TRUE()
+			)
+		formatString: 0.0
+		displayFolder: Entrega
+		lineageTag: 9e9af427-cba6-457a-8844-c38a85c43965
+
+	measure 'Pedidos avaliados' = DISTINCTCOUNT(fct_reviews[order_id])
+		formatString: #,0
+		displayFolder: Avaliação
+		lineageTag: 28bf7df7-1571-470f-992b-319fb976c967
+
+	/// Average of the order scores. An order with several reviews counts once, with their average (analyses 08 and 09).
+	measure 'Nota média' =
+			AVERAGEX(
+			    VALUES(fct_reviews[order_id]),
+			    CALCULATE(AVERAGE(fct_reviews[review_score]))
+			)
+		formatString: 0.00
+		displayFolder: Avaliação
+		lineageTag: d466bda7-e54f-414c-b3ea-9af6b04ae930
+
+	/// Reviewed orders whose score is 1 or 2.
+	measure 'Pedidos com nota baixa' =
+			COUNTROWS(
+			    FILTER(
+			        VALUES(fct_reviews[order_id]),
+			        CALCULATE(AVERAGE(fct_reviews[review_score])) <= 2
+			    )
+			)
+		formatString: #,0
+		displayFolder: Avaliação
+		lineageTag: 1fa3f855-2bd2-4de6-8a23-5fdd41f4e136
+
+	measure '% notas baixas' = DIVIDE([Pedidos com nota baixa], [Pedidos avaliados])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Avaliação
+		lineageTag: 2b757393-339d-4752-9ce5-c7eff16b5bcc
+
+	/// Of all orders scored 1 or 2, the share that arrived after the estimated date.
+	measure '% das notas baixas com atraso' =
+			DIVIDE(
+			    CALCULATE([Pedidos com nota baixa], fct_orders[is_late] = TRUE()),
+			    [Pedidos com nota baixa]
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Avaliação
+		lineageTag: 1fcd7bdb-3757-41cc-91da-850385f22d6f
+
+	/// A review belongs to the order, not to a seller. Only orders with a single seller are attributed (analysis 08);
+	/// the seller filter reaches the orders through their items.
+	measure 'Nota média (um vendedor)' =
+			CALCULATE(
+			    [Nota média],
+			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    fct_orders[sellers_count] = 1
+			)
+		formatString: 0.00
+		displayFolder: Vendedor
+		lineageTag: 5f607a17-930f-467c-be61-3194908324ae
+
+	measure 'Pedidos avaliados (um vendedor)' =
+			CALCULATE(
+			    [Pedidos avaliados],
+			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    fct_orders[sellers_count] = 1
+			)
+		formatString: #,0
+		displayFolder: Vendedor
+		lineageTag: 3f0cf042-fe17-462c-8ffa-48c5030a538d
+
+	measure '% notas baixas (um vendedor)' =
+			CALCULATE(
+			    [% notas baixas],
+			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    fct_orders[sellers_count] = 1
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Vendedor
+		lineageTag: 0e715e8b-cfed-4b7e-9f25-796463c89849
+
+	measure 'Pedidos entregues (um vendedor)' =
+			CALCULATE(
+			    [Pedidos entregues],
+			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    fct_orders[sellers_count] = 1
+			)
+		formatString: #,0
+		displayFolder: Vendedor
+		lineageTag: 0fc837ba-f010-4f82-88e2-4c09b8ca3781
+
+	measure '% atrasados (um vendedor)' =
+			CALCULATE(
+			    [% atrasados],
+			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    fct_orders[sellers_count] = 1
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Vendedor
+		lineageTag: e1889df1-920a-4f3a-b54b-f66540e12fbb
+
+	/// People (customer_unique_id) with at least one valid order. Counting customer_id would make every order a new customer.
+	measure Clientes =
+			CALCULATE(
+			    DISTINCTCOUNT(fct_orders[customer_key]),
+			    NOT fct_orders[order_status] IN { "canceled", "unavailable" }
+			)
+		formatString: #,0
+		displayFolder: Clientes
+		lineageTag: 80797dde-f978-4cb6-9504-f03ac37a565e
+
+	/// Share of customers with exactly one valid order (analysis 10).
+	measure '% clientes com um pedido' =
+			VAR valid_customers =
+			    CALCULATETABLE(
+			        VALUES(fct_orders[customer_key]),
+			        NOT fct_orders[order_status] IN { "canceled", "unavailable" }
+			    )
+			VAR single_order =
+			    FILTER(
+			        valid_customers,
+			        CALCULATE(
+			            COUNTROWS(fct_orders),
+			            NOT fct_orders[order_status] IN { "canceled", "unavailable" }
+			        ) = 1
+			    )
+			RETURN
+			    DIVIDE(COUNTROWS(single_order), COUNTROWS(valid_customers))
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Clientes
+		lineageTag: b85435f8-84a7-4e4c-a42f-84b64ed2156a
+
+	measure '% clientes que voltaram' = 1 - [% clientes com um pedido]
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Clientes
+		lineageTag: fab6ee66-7904-4148-bf1e-eb8c7bb1d38c
+
+	column Value
+		dataType: int64
+		isHidden
+		lineageTag: 2df61611-1d15-46ad-9495-3db24c59923c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value]
+
+	partition Medidas = calculated
+		mode: import
+		source = ROW("Value", 0)
+

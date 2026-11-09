@@ -176,6 +176,29 @@ table fct_orders
 		summarizeBy: none
 		sourceColumn: is_late
 
+	/// Same bands as dbt/analyses/09_review_score_vs_delay.sql. Blank when the order was not delivered.
+	column delay_bucket =
+			SWITCH(
+			    TRUE(),
+			    NOT fct_orders[is_delivered], BLANK(),
+			    fct_orders[days_late_vs_estimate] <= 0, "1. no prazo ou antes",
+			    fct_orders[days_late_vs_estimate] <= 3, "2. 1 a 3 dias de atraso",
+			    fct_orders[days_late_vs_estimate] <= 7, "3. 4 a 7 dias de atraso",
+			    fct_orders[days_late_vs_estimate] <= 14, "4. 8 a 14 dias de atraso",
+			    "5. mais de 14 dias de atraso"
+			)
+		dataType: string
+		lineageTag: 4b2774f2-03c2-4533-98a8-bb45cd0323bb
+		summarizeBy: none
+
+	/// Distinct sellers in the order. A review or a delay is only attributed to a seller when this is 1 (same rule as analysis 08).
+	column sellers_count = CALCULATE(DISTINCTCOUNT(fct_order_items[seller_key]))
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 02131055-bf6c-4426-9923-b421fef49ea2
+		summarizeBy: none
+
 	partition fct_orders = m
 		mode: import
 		source =
