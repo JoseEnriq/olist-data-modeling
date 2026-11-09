@@ -21,4 +21,5 @@ ref table fct_orders
 ref table fct_order_items
 ref table fct_payments
 ref table fct_reviews
+ref table Medidas
 
