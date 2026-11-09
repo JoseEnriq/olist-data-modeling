@@ -5,6 +5,9 @@ data/raw/
 *.duckdb
 *.duckdb.wal
 
+# Marts exported for Power BI (see scripts/export_marts.py)
+data/marts/
+
 # dbt artifacts
 dbt/target/
 dbt/logs/
