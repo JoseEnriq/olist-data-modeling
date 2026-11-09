@@ -1,0 +1,94 @@
+/// One row per unit of product sold. Reaches customer, location and date through fct_orders.
+table fct_order_items
+	lineageTag: 59f00aa1-43d6-4936-ba3f-ed7709c7835d
+
+	column order_id
+		dataType: string
+		lineageTag: 1d6d681d-34e0-45e4-b85b-37564c33dd6a
+		summarizeBy: none
+		sourceColumn: order_id
+
+	column order_item_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 19acc184-94a7-4f13-9953-ddee2c1046d9
+		summarizeBy: none
+		sourceColumn: order_item_id
+
+	column customer_key
+		dataType: string
+		isHidden
+		lineageTag: 4e6f2323-b832-4728-8ddf-52045bfd8118
+		summarizeBy: none
+		sourceColumn: customer_key
+
+	column delivery_location_key
+		dataType: string
+		isHidden
+		lineageTag: f91cd0ba-dc49-437f-ab6e-bf703988fed8
+		summarizeBy: none
+		sourceColumn: delivery_location_key
+
+	column product_key
+		dataType: string
+		isHidden
+		lineageTag: 000ff1c5-1a8e-4016-8a29-382a5962b9a9
+		summarizeBy: none
+		sourceColumn: product_key
+
+	column seller_key
+		dataType: string
+		isHidden
+		lineageTag: 01c7ae4c-e315-4bf6-8c8c-d07873736f79
+		summarizeBy: none
+		sourceColumn: seller_key
+
+	column purchase_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7b211ae7-63f2-4467-8a9c-94aaa56c7429
+		summarizeBy: none
+		sourceColumn: purchase_date_key
+
+	column order_status
+		dataType: string
+		lineageTag: 3a27b4e7-a5a7-4151-a634-107618f83384
+		summarizeBy: none
+		sourceColumn: order_status
+
+	column shipping_limit_at
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: f230b8af-1ad0-4ab6-b9e3-8064128bbc3e
+		summarizeBy: none
+		sourceColumn: shipping_limit_at
+
+	column price
+		dataType: double
+		formatString: #,0.00
+		lineageTag: a91d1f6c-ca92-4a06-9d02-79e3f26bfdc8
+		summarizeBy: sum
+		sourceColumn: price
+
+		annotation SummarizationSetBy = Automatic
+
+	column freight_value
+		dataType: double
+		formatString: #,0.00
+		lineageTag: fc53f315-2fcb-4aeb-b750-13fa0c30245d
+		summarizeBy: sum
+		sourceColumn: freight_value
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fct_order_items = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\fct_order_items.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,188 @@
+/// Accumulating snapshot, one row per order. Works as the order header: items, payments and reviews connect to it by order_id.
+table fct_orders
+	lineageTag: ec1593c2-c8f6-43b8-8ac4-3d5d0e51fde4
+
+	column order_id
+		dataType: string
+		lineageTag: 5425029f-cc6e-43ac-9d34-eeda5c8e515d
+		summarizeBy: none
+		sourceColumn: order_id
+
+	column customer_key
+		dataType: string
+		isHidden
+		lineageTag: e264d522-86c4-4f3e-84aa-948136553c93
+		summarizeBy: none
+		sourceColumn: customer_key
+
+	column delivery_location_key
+		dataType: string
+		isHidden
+		lineageTag: 7d845924-f650-41d9-81f1-8ae33dd0fa97
+		summarizeBy: none
+		sourceColumn: delivery_location_key
+
+	column purchase_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f00044fd-74f8-4f4a-8c31-bfad5d2d632d
+		summarizeBy: none
+		sourceColumn: purchase_date_key
+
+	column approved_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1b96c599-0af4-4b30-9f19-5753ba908afe
+		summarizeBy: none
+		sourceColumn: approved_date_key
+
+	column delivered_to_carrier_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0724c165-ce89-4818-9b49-d665b8634561
+		summarizeBy: none
+		sourceColumn: delivered_to_carrier_date_key
+
+	column delivered_to_customer_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 422252d8-d494-450c-987a-8576b473ed4b
+		summarizeBy: none
+		sourceColumn: delivered_to_customer_date_key
+
+	column estimated_delivery_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: dabbbd0c-bff9-4fe8-92c6-d75587d5581f
+		summarizeBy: none
+		sourceColumn: estimated_delivery_date_key
+
+	column order_status
+		dataType: string
+		lineageTag: 91616fb8-5f22-483f-8e37-470460cbb7ee
+		summarizeBy: none
+		sourceColumn: order_status
+
+	column purchased_at
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: 02db090f-1393-4454-9966-6656d4130e7c
+		summarizeBy: none
+		sourceColumn: purchased_at
+
+	column approved_at
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: 66545be1-b193-480b-97e1-28d2cb8605ab
+		summarizeBy: none
+		sourceColumn: approved_at
+
+	column delivered_to_carrier_at
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: 827d9a54-341d-4186-ba09-497b02410c90
+		summarizeBy: none
+		sourceColumn: delivered_to_carrier_at
+
+	column delivered_to_customer_at
+		dataType: dateTime
+		formatString: dd/MM/yyyy HH:mm
+		lineageTag: 94d06598-5efb-42b0-bfff-e916901dcd56
+		summarizeBy: none
+		sourceColumn: delivered_to_customer_at
+
+	column estimated_delivery_date
+		dataType: dateTime
+		formatString: dd/MM/yyyy
+		lineageTag: 2c9229ca-8fef-4fb9-ae33-f4cec610ed72
+		summarizeBy: none
+		sourceColumn: estimated_delivery_date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column items_count
+		dataType: int64
+		formatString: 0
+		lineageTag: aa0b34eb-672e-4604-b16c-4a66bdd0b2a8
+		summarizeBy: none
+		sourceColumn: items_count
+
+	column items_price_total
+		dataType: double
+		formatString: #,0.00
+		lineageTag: fbf6a565-f41c-4195-8412-a268722dfea2
+		summarizeBy: sum
+		sourceColumn: items_price_total
+
+		annotation SummarizationSetBy = Automatic
+
+	column freight_total
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 19569874-e7ad-4efd-b912-68bc62ef7f8b
+		summarizeBy: sum
+		sourceColumn: freight_total
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_total
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 2ab82e68-d997-44e0-8451-cfb0c0f42dfa
+		summarizeBy: sum
+		sourceColumn: payment_total
+
+		annotation SummarizationSetBy = Automatic
+
+	column hours_to_approve
+		dataType: double
+		formatString: #,0.00
+		lineageTag: fca60efc-3eaf-4bb5-8367-bec2e2a4006c
+		summarizeBy: sum
+		sourceColumn: hours_to_approve
+
+		annotation SummarizationSetBy = Automatic
+
+	column days_to_deliver
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 73a838e1-e384-47aa-a403-efa1e0c97a3d
+		summarizeBy: sum
+		sourceColumn: days_to_deliver
+
+		annotation SummarizationSetBy = Automatic
+
+	column days_late_vs_estimate
+		dataType: int64
+		formatString: 0
+		lineageTag: 61ddaeda-6f5a-4a6b-a818-4edb08abc1f9
+		summarizeBy: none
+		sourceColumn: days_late_vs_estimate
+
+	column is_delivered
+		dataType: boolean
+		lineageTag: fc99041b-8a39-47cb-b17b-31e7f473ce6d
+		summarizeBy: none
+		sourceColumn: is_delivered
+
+	column is_late
+		dataType: boolean
+		lineageTag: ed8d3d54-1e33-4aba-95ff-45fb0f3c526a
+		summarizeBy: none
+		sourceColumn: is_late
+
+	partition fct_orders = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\fct_orders.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
