@@ -1,0 +1,82 @@
+/// One row per product. Category names stay in Portuguese, as in the source.
+table dim_product
+	lineageTag: 1f0798f4-45ca-4148-8e12-b6a335b1448f
+
+	column product_key
+		dataType: string
+		isHidden
+		lineageTag: 2a7f764f-2433-44ab-bc99-7d4c939f1d99
+		summarizeBy: none
+		sourceColumn: product_key
+
+	column product_id
+		dataType: string
+		lineageTag: 0461c09b-2ebf-47b9-9dc3-a64999713f38
+		summarizeBy: none
+		sourceColumn: product_id
+
+	column product_category_name
+		dataType: string
+		lineageTag: 35c7362f-21a3-486a-9175-c8adacd13559
+		summarizeBy: none
+		sourceColumn: product_category_name
+
+	column product_name_length
+		dataType: int64
+		formatString: 0
+		lineageTag: d39186e7-0990-46f8-a0dd-040cb325287c
+		summarizeBy: none
+		sourceColumn: product_name_length
+
+	column product_description_length
+		dataType: int64
+		formatString: 0
+		lineageTag: df316fef-ef77-4c03-a69a-709f22b01c87
+		summarizeBy: none
+		sourceColumn: product_description_length
+
+	column product_photos_qty
+		dataType: int64
+		formatString: 0
+		lineageTag: c5b5adf8-0d38-4053-9943-84aa688807f5
+		summarizeBy: none
+		sourceColumn: product_photos_qty
+
+	column product_weight_g
+		dataType: int64
+		formatString: 0
+		lineageTag: 7f1dd9b7-af08-45d6-ba47-e10bf420809b
+		summarizeBy: none
+		sourceColumn: product_weight_g
+
+	column product_length_cm
+		dataType: int64
+		formatString: 0
+		lineageTag: 9862788a-13e4-4161-9f40-c2e44916da78
+		summarizeBy: none
+		sourceColumn: product_length_cm
+
+	column product_height_cm
+		dataType: int64
+		formatString: 0
+		lineageTag: fe70e0e7-3ac7-483d-a346-e7173774aafa
+		summarizeBy: none
+		sourceColumn: product_height_cm
+
+	column product_width_cm
+		dataType: int64
+		formatString: 0
+		lineageTag: aff4c079-7c7e-45c0-a75f-6b4f0bf60aff
+		summarizeBy: none
+		sourceColumn: product_width_cm
+
+	partition dim_product = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\dim_product.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

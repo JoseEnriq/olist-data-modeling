@@ -1,0 +1,94 @@
+/// One row per calendar day, 2016 to 2018. Plays several roles: purchase, delivery and review dates.
+table dim_date
+	lineageTag: 78f1b95c-c723-4ad2-9301-6ef73e8e40a7
+	dataCategory: Time
+
+	column date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e3d242c5-627a-4b09-8285-3cb9a3d3a015
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column date
+		dataType: dateTime
+		isKey
+		formatString: dd/MM/yyyy
+		lineageTag: 69500e91-d6a3-4552-a2ac-a417a3d72c91
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: a2a02ff9-f4c4-49c6-a1b1-4e4768a90ed2
+		summarizeBy: none
+		sourceColumn: year
+
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: 7e28d643-9e01-4e0d-b28a-513b9b78dd2e
+		summarizeBy: none
+		sourceColumn: quarter
+
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: f8c243fd-e10d-4762-b729-452703109eb6
+		summarizeBy: none
+		sourceColumn: month
+
+	column month_name
+		dataType: string
+		lineageTag: 252e14f0-6f10-4d2d-abac-c0fd2224730c
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: month
+
+	column year_month
+		dataType: string
+		lineageTag: a4090c24-91c7-45f0-a251-30e30f8e7ffd
+		summarizeBy: none
+		sourceColumn: year_month
+
+	column day_of_month
+		dataType: int64
+		formatString: 0
+		lineageTag: 39b3f40b-26d0-4d5b-9466-6b94f726f7af
+		summarizeBy: none
+		sourceColumn: day_of_month
+
+	column day_of_week
+		dataType: int64
+		formatString: 0
+		lineageTag: f2aa4e1e-8297-4712-be55-b97628893562
+		summarizeBy: none
+		sourceColumn: day_of_week
+
+	column day_name
+		dataType: string
+		lineageTag: 0f2d511c-cb1e-4210-bb26-d3bc97ea905c
+		summarizeBy: none
+		sourceColumn: day_name
+		sortByColumn: day_of_week
+
+	column is_weekend
+		dataType: boolean
+		lineageTag: 9df2c541-733e-4d02-9084-9cdeefaada33
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\dim_date.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
