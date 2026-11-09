@@ -1,0 +1,63 @@
+/// One row per review linked to an order. A review can cover more than one order.
+table fct_reviews
+	lineageTag: 195e7549-4ee1-43a4-b023-66a37fb8bc5a
+
+	column review_id
+		dataType: string
+		lineageTag: 78fc2981-34bf-4e23-9adb-6c641a647a6a
+		summarizeBy: none
+		sourceColumn: review_id
+
+	column order_id
+		dataType: string
+		lineageTag: c792ffb5-31de-4bc6-8f44-a6f1b8f9b0ea
+		summarizeBy: none
+		sourceColumn: order_id
+
+	column customer_key
+		dataType: string
+		isHidden
+		lineageTag: 5c58b25e-b94e-4ce3-aabb-9a8af56268d9
+		summarizeBy: none
+		sourceColumn: customer_key
+
+	column review_created_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: fc195e1b-070e-4d09-afdf-c71332d8a2ed
+		summarizeBy: none
+		sourceColumn: review_created_date_key
+
+	column review_score
+		dataType: int64
+		formatString: 0
+		lineageTag: 95cbde4d-e8de-48a3-8344-b861494d2ef2
+		summarizeBy: none
+		sourceColumn: review_score
+
+	column has_comment
+		dataType: boolean
+		lineageTag: a86b905d-6816-441a-ae06-30ab3681374b
+		summarizeBy: none
+		sourceColumn: has_comment
+
+	column hours_to_answer
+		dataType: double
+		formatString: #,0.00
+		lineageTag: ff7e3b90-a485-4da2-b5db-7d7be18b9fb0
+		summarizeBy: sum
+		sourceColumn: hours_to_answer
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fct_reviews = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\fct_reviews.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

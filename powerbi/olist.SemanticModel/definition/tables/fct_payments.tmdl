@@ -1,0 +1,64 @@
+/// One row per payment. An order can be paid with more than one method.
+table fct_payments
+	lineageTag: 82f0ac0b-5071-45f4-bdfc-444284da9b4d
+
+	column order_id
+		dataType: string
+		lineageTag: 0559ae94-7e44-4fad-b5b9-0bb6b465e981
+		summarizeBy: none
+		sourceColumn: order_id
+
+	column payment_sequential
+		dataType: int64
+		formatString: 0
+		lineageTag: 1fd896fc-29b9-4125-ae1c-604f462689af
+		summarizeBy: none
+		sourceColumn: payment_sequential
+
+	column customer_key
+		dataType: string
+		isHidden
+		lineageTag: 07bb3592-1b40-4c9c-b316-76b8256c8e2c
+		summarizeBy: none
+		sourceColumn: customer_key
+
+	column purchase_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0c524119-25b6-4fdc-8403-a1c0c7b8d506
+		summarizeBy: none
+		sourceColumn: purchase_date_key
+
+	column payment_type
+		dataType: string
+		lineageTag: bcf180de-4253-472f-9e4c-0d42ee0e2bf7
+		summarizeBy: none
+		sourceColumn: payment_type
+
+	column payment_installments
+		dataType: int64
+		formatString: 0
+		lineageTag: eb24cef6-6d6a-449d-8963-318409f50cd4
+		summarizeBy: none
+		sourceColumn: payment_installments
+
+	column payment_value
+		dataType: double
+		formatString: #,0.00
+		lineageTag: fe228379-7cd2-49ff-9edc-def3015066b0
+		summarizeBy: sum
+		sourceColumn: payment_value
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fct_payments = m
+		mode: import
+		source =
+				let
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\fct_payments.parquet"))
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
