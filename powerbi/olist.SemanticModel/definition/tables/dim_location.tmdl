@@ -26,6 +26,7 @@ table dim_location
 		lineageTag: 6ac8eb5a-83ea-4f21-b182-9068cc37dc51
 		summarizeBy: none
 		sourceColumn: state
+		sortByColumn: state_sort
 
 	column latitude
 		dataType: double
@@ -39,13 +40,30 @@ table dim_location
 		summarizeBy: none
 		sourceColumn: longitude
 
+	/// Sort key for state: minus the number of orders delivered to the state, computed in Power Query.
+	column state_sort
+		dataType: int64
+		isHidden
+		lineageTag: 6aad4021-105d-4b34-be18-4003dfbb781e
+		summarizeBy: none
+		sourceColumn: state_sort
+
 	partition dim_location = m
 		mode: import
 		source =
 				let
-				    Source = Parquet.Document(File.Contents(MartsFolder & "\dim_location.parquet"))
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\dim_location.parquet")),
+				    // Sort key for the state: done here, not in DAX, because a DAX column computed from
+				    // the state cannot also be the column that sorts the state (circular dependency).
+				    Facts = Table.SelectColumns(Parquet.Document(File.Contents(MartsFolder & "\fct_orders.parquet")), {"delivery_location_key"}),
+				    States = Table.SelectColumns(Source, {"location_key", "state"}),
+				    FactStates = Table.Join(Facts, "delivery_location_key", States, "location_key"),
+				    Counts = Table.Group(FactStates, {"state"}, {{"rows", each Table.RowCount(_), Int64.Type}}),
+				    Joined = Table.NestedJoin(Source, {"state"}, Counts, {"state"}, "counts", JoinKind.LeftOuter),
+				    Expanded = Table.ExpandTableColumn(Joined, "counts", {"rows"}, {"state_sort"}),
+				    Result = Table.TransformColumns(Expanded, {{"state_sort", each if _ = null then 0 else -_, Int64.Type}})
 				in
-				    Source
+				    Result
 
 	annotation PBI_ResultType = Table
 

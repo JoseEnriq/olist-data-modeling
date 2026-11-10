@@ -213,6 +213,32 @@ table fct_orders
 		lineageTag: 066befd3-4070-407c-a164-d6016e5b9830
 		summarizeBy: none
 
+	/// Short name of delay_bucket for chart axes, sorted by the bucket number.
+	column delay_label =
+			SWITCH(
+			    fct_orders[delay_bucket],
+			    "1. no prazo ou antes", "No prazo",
+			    "2. 1 a 3 dias de atraso", "1 a 3 dias",
+			    "3. 4 a 7 dias de atraso", "4 a 7 dias",
+			    "4. 8 a 14 dias de atraso", "8 a 14 dias",
+			    "5. mais de 14 dias de atraso", "mais de 14"
+			)
+		dataType: string
+		lineageTag: fc614ccd-69a6-4f7d-9393-3fc50a2cf7c8
+		summarizeBy: none
+		sortByColumn: delay_bucket
+
+	/// Splits reviewed orders into scores 1-2 and 3-5, for the progress bars of the first page. Blank when not reviewed.
+	column score_group =
+			IF(
+			    ISBLANK(fct_orders[order_score]),
+			    BLANK(),
+			    IF(fct_orders[order_score] <= 2, "notas 1 e 2", "notas 3 a 5")
+			)
+		dataType: string
+		lineageTag: 89b51311-45f1-46e8-acf5-600ae0b2988f
+		summarizeBy: none
+
 	partition fct_orders = m
 		mode: import
 		source =
