@@ -61,7 +61,13 @@
         ],
         "border": [
           {
-            "show": false
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "radius": 6
           }
         ],
         "dropShadow": [
