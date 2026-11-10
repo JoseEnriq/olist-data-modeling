@@ -199,6 +199,20 @@ table fct_orders
 		lineageTag: 02131055-bf6c-4426-9923-b421fef49ea2
 		summarizeBy: none
 
+	/// Average review score of the order, computed once at refresh. An order with several reviews counts once (analyses 08 and 09).
+	column order_score = CALCULATE(AVERAGE(fct_reviews[review_score]))
+		dataType: double
+		formatString: 0.00
+		lineageTag: 99da3269-4920-45d6-910b-ef9394de6126
+		summarizeBy: none
+
+	/// The seller of orders with a single seller; blank otherwise. Inactive relationship to dim_seller, used only by the seller measures.
+	column single_seller_key = IF(fct_orders[sellers_count] = 1, CALCULATE(MAX(fct_order_items[seller_key])))
+		dataType: string
+		isHidden
+		lineageTag: 066befd3-4070-407c-a164-d6016e5b9830
+		summarizeBy: none
+
 	partition fct_orders = m
 		mode: import
 		source =
