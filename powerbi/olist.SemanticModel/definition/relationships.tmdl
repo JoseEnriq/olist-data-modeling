@@ -40,3 +40,8 @@ relationship f65b8efa-da2c-4449-b23d-28adaaff3ed1
 	fromColumn: fct_reviews.review_created_date_key
 	toColumn: dim_date.date_key
 
+relationship d5adcbd2-aea9-4420-9203-6910569cfbde
+	isActive: false
+	fromColumn: fct_orders.single_seller_key
+	toColumn: dim_seller.seller_key
+

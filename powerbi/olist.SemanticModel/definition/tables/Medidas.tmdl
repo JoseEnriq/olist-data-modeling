@@ -62,32 +62,27 @@ table Medidas
 		displayFolder: Entrega
 		lineageTag: 9e9af427-cba6-457a-8844-c38a85c43965
 
-	measure 'Pedidos avaliados' = DISTINCTCOUNT(fct_reviews[order_id])
+	measure 'Pedidos avaliados' = CALCULATE(COUNTROWS(fct_orders), NOT ISBLANK(fct_orders[order_score]))
 		formatString: #,0
 		displayFolder: Avaliação
-		lineageTag: 28bf7df7-1571-470f-992b-319fb976c967
+		lineageTag: 0d2a93bf-bf22-44d2-8fe1-861b0184838c
 
 	/// Average of the order scores. An order with several reviews counts once, with their average (analyses 08 and 09).
-	measure 'Nota média' =
-			AVERAGEX(
-			    VALUES(fct_reviews[order_id]),
-			    CALCULATE(AVERAGE(fct_reviews[review_score]))
-			)
+	measure 'Nota média' = AVERAGE(fct_orders[order_score])
 		formatString: 0.00
 		displayFolder: Avaliação
-		lineageTag: d466bda7-e54f-414c-b3ea-9af6b04ae930
+		lineageTag: 4e99a6d7-8285-4bc1-9d2b-455928e79586
 
-	/// Reviewed orders whose score is 1 or 2.
+	/// Reviewed orders whose score is 1 or 2. ISBLANK is needed: in DAX a blank score also passes "<= 2".
 	measure 'Pedidos com nota baixa' =
-			COUNTROWS(
-			    FILTER(
-			        VALUES(fct_reviews[order_id]),
-			        CALCULATE(AVERAGE(fct_reviews[review_score])) <= 2
-			    )
+			CALCULATE(
+			    COUNTROWS(fct_orders),
+			    NOT ISBLANK(fct_orders[order_score]),
+			    fct_orders[order_score] <= 2
 			)
 		formatString: #,0
 		displayFolder: Avaliação
-		lineageTag: 1fa3f855-2bd2-4de6-8a23-5fdd41f4e136
+		lineageTag: 8b0b48ca-5240-4ec4-8f0f-49e7a37c7fbe
 
 	measure '% notas baixas' = DIVIDE([Pedidos com nota baixa], [Pedidos avaliados])
 		formatString: 0.0%;-0.0%;0.0%
@@ -104,57 +99,57 @@ table Medidas
 		displayFolder: Avaliação
 		lineageTag: 1fcd7bdb-3757-41cc-91da-850385f22d6f
 
-	/// A review belongs to the order, not to a seller. Only orders with a single seller are attributed (analysis 08);
-	/// the seller filter reaches the orders through their items.
+	/// A review belongs to the order, not to a seller. Only orders with a single seller are attributed (analysis 08):
+	/// the inactive relationship fct_orders[single_seller_key] -> dim_seller is switched on inside the measure.
 	measure 'Nota média (um vendedor)' =
 			CALCULATE(
 			    [Nota média],
-			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    USERELATIONSHIP(fct_orders[single_seller_key], dim_seller[seller_key]),
 			    fct_orders[sellers_count] = 1
 			)
 		formatString: 0.00
 		displayFolder: Vendedor
-		lineageTag: 5f607a17-930f-467c-be61-3194908324ae
+		lineageTag: 04b36d1b-6004-4821-98ea-c0684dc004d0
 
 	measure 'Pedidos avaliados (um vendedor)' =
 			CALCULATE(
 			    [Pedidos avaliados],
-			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    USERELATIONSHIP(fct_orders[single_seller_key], dim_seller[seller_key]),
 			    fct_orders[sellers_count] = 1
 			)
 		formatString: #,0
 		displayFolder: Vendedor
-		lineageTag: 3f0cf042-fe17-462c-8ffa-48c5030a538d
+		lineageTag: 7d5cde3e-6e59-4e2a-881b-3dc5abee95c2
 
 	measure '% notas baixas (um vendedor)' =
 			CALCULATE(
 			    [% notas baixas],
-			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    USERELATIONSHIP(fct_orders[single_seller_key], dim_seller[seller_key]),
 			    fct_orders[sellers_count] = 1
 			)
 		formatString: 0.0%;-0.0%;0.0%
 		displayFolder: Vendedor
-		lineageTag: 0e715e8b-cfed-4b7e-9f25-796463c89849
+		lineageTag: 1744cf06-e253-441d-a43e-2cd868158a59
 
 	measure 'Pedidos entregues (um vendedor)' =
 			CALCULATE(
 			    [Pedidos entregues],
-			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    USERELATIONSHIP(fct_orders[single_seller_key], dim_seller[seller_key]),
 			    fct_orders[sellers_count] = 1
 			)
 		formatString: #,0
 		displayFolder: Vendedor
-		lineageTag: 0fc837ba-f010-4f82-88e2-4c09b8ca3781
+		lineageTag: 7f5b1f25-7bc5-4060-b532-ad306bc39398
 
 	measure '% atrasados (um vendedor)' =
 			CALCULATE(
 			    [% atrasados],
-			    CROSSFILTER(fct_order_items[order_id], fct_orders[order_id], Both),
+			    USERELATIONSHIP(fct_orders[single_seller_key], dim_seller[seller_key]),
 			    fct_orders[sellers_count] = 1
 			)
 		formatString: 0.0%;-0.0%;0.0%
 		displayFolder: Vendedor
-		lineageTag: e1889df1-920a-4f3a-b54b-f66540e12fbb
+		lineageTag: a00ce464-6382-4926-986c-f1a34a85c1c3
 
 	/// People (customer_unique_id) with at least one valid order. Counting customer_id would make every order a new customer.
 	measure Clientes =
