@@ -32,6 +32,7 @@ table dim_seller
 		lineageTag: 1e029c5c-4efe-4a6c-bad8-c1253d76b37f
 		summarizeBy: none
 		sourceColumn: seller_state
+		sortByColumn: seller_state_sort
 
 	column latitude
 		dataType: double
@@ -45,13 +46,36 @@ table dim_seller
 		summarizeBy: none
 		sourceColumn: longitude
 
+	/// First 8 characters of seller_id, for tables. Unique among the 3,095 sellers (checked in DuckDB).
+	column seller_short_id = LEFT(dim_seller[seller_id], 8) & "…"
+		dataType: string
+		lineageTag: 26668cb8-9cba-44bd-88ef-9eb459cba676
+		summarizeBy: none
+
+	/// Sort key for seller_state: minus the number of items sold from the state, computed in Power Query.
+	column seller_state_sort
+		dataType: int64
+		isHidden
+		lineageTag: 899f71e6-c6eb-4c0d-86ab-ad4e21756932
+		summarizeBy: none
+		sourceColumn: seller_state_sort
+
 	partition dim_seller = m
 		mode: import
 		source =
 				let
-				    Source = Parquet.Document(File.Contents(MartsFolder & "\dim_seller.parquet"))
+				    Source = Parquet.Document(File.Contents(MartsFolder & "\dim_seller.parquet")),
+				    // Sort key for the state: done here, not in DAX, because a DAX column computed from
+				    // the state cannot also be the column that sorts the state (circular dependency).
+				    Facts = Table.SelectColumns(Parquet.Document(File.Contents(MartsFolder & "\fct_order_items.parquet")), {"seller_key"}),
+				    States = Table.SelectColumns(Source, {"seller_key", "seller_state"}),
+				    FactStates = Table.Join(Facts, "seller_key", States, "seller_key"),
+				    Counts = Table.Group(FactStates, {"seller_state"}, {{"rows", each Table.RowCount(_), Int64.Type}}),
+				    Joined = Table.NestedJoin(Source, {"seller_state"}, Counts, {"seller_state"}, "counts", JoinKind.LeftOuter),
+				    Expanded = Table.ExpandTableColumn(Joined, "counts", {"rows"}, {"seller_state_sort"}),
+				    Result = Table.TransformColumns(Expanded, {{"seller_state_sort", each if _ = null then 0 else -_, Int64.Type}})
 				in
-				    Source
+				    Result
 
 	annotation PBI_ResultType = Table
 

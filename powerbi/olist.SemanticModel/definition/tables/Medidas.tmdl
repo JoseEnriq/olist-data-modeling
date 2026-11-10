@@ -187,6 +187,288 @@ table Medidas
 		displayFolder: Clientes
 		lineageTag: fab6ee66-7904-4148-bf1e-eb8c7bb1d38c
 
+	/// People behind the orders. One customer_unique_id can have several customer_id, one per order.
+	measure 'Clientes (pessoas)' = COUNTROWS(dim_customer)
+		formatString: #,0
+		displayFolder: Clientes
+		lineageTag: 88cb76a3-abf5-43b7-adf6-973aa4a4a714
+
+	/// The source gives one customer_id per order, so counting it counts orders.
+	measure 'customer_id distintos' = COUNTROWS(fct_orders)
+		formatString: #,0
+		displayFolder: Clientes
+		lineageTag: 61e18ee6-8a7d-4bf8-9ad4-82e5c8905550
+
+	/// is_delivered is needed: in DAX a blank is_late (order not delivered) also passes "= FALSE()".
+	measure 'Nota média (no prazo)' = CALCULATE([Nota média], fct_orders[is_delivered] = TRUE(), fct_orders[is_late] = FALSE())
+		formatString: 0.00
+		displayFolder: Páginas\O efeito
+		lineageTag: 7cda56d9-890f-471f-9e03-eba8c04369ef
+
+	measure 'Nota média (atrasados)' = CALCULATE([Nota média], fct_orders[is_late] = TRUE())
+		formatString: 0.00
+		displayFolder: Páginas\O efeito
+		lineageTag: 8d2f217b-ad18-413d-9c90-35ec5a061777
+
+	measure 'Nota média (8 a 14 dias de atraso)' = CALCULATE([Nota média], fct_orders[delay_bucket] = "4. 8 a 14 dias de atraso")
+		formatString: 0.00
+		displayFolder: Páginas\O efeito
+		lineageTag: 01849514-4548-4fbc-9adf-50b2872c7cd3
+
+	/// Gray for orders delivered on time, orange for every late band.
+	measure 'Cor · faixa de atraso' =
+			IF(
+			    SELECTEDVALUE(fct_orders[delay_bucket]) = "1. no prazo ou antes",
+			    "#8F8D87",
+			    "#EB6834"
+			)
+		displayFolder: Páginas\O efeito
+		lineageTag: 3db4bd33-568d-45ea-ab80-dbfd628ca3a7
+
+	measure 'Nota no prazo → atrasado' = FORMAT([Nota média (no prazo)], "0.00") & " → " & FORMAT([Nota média (atrasados)], "0.00")
+		displayFolder: Páginas\O efeito
+		lineageTag: 0fd9d9fa-1577-4c81-be17-3c440a1dcb17
+
+	/// Share of late deliveries in Brazil, ignoring the state in context. Reference for the state bars.
+	measure '% atrasados (Brasil)' = CALCULATE([% atrasados], REMOVEFILTERS(dim_location))
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Páginas\Onde
+		lineageTag: a988eb74-71b1-468a-b9ce-1d6d06a4f1c1
+
+	/// Orange for states above the Brazilian average, gray for the rest.
+	measure 'Cor · atraso do estado' = IF([% atrasados] > [% atrasados (Brasil)], "#EB6834", "#8F8D87")
+		displayFolder: Páginas\Onde
+		lineageTag: f5d15ba6-52d1-479f-bc2c-8c2c97e7d429
+
+	measure '% atrasados SP → RJ' =
+			CALCULATE(
+			    [% atrasados (um vendedor)],
+			    dim_seller[seller_state] = "SP",
+			    dim_location[state] = "RJ"
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Páginas\Onde
+		lineageTag: fed3299d-3874-4238-a9e5-e0524d3ca918
+
+	measure '% atrasados SP → MG' =
+			CALCULATE(
+			    [% atrasados (um vendedor)],
+			    dim_seller[seller_state] = "SP",
+			    dim_location[state] = "MG"
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Páginas\Onde
+		lineageTag: 69913700-dafb-4789-9963-03821eee542b
+
+	measure 'SP → RJ × SP → MG' = FORMAT([% atrasados SP → RJ], "0.0%") & " × " & FORMAT([% atrasados SP → MG], "0.0%")
+		displayFolder: Páginas\Onde
+		lineageTag: 81d1f6d3-e144-4d6a-be33-4cb4064e95be
+
+	/// Late share of a route (seller state to customer state). Blank under 50 deliveries, where one order moves the rate too much.
+	measure '% atrasados (rota)' = IF([Pedidos entregues (um vendedor)] >= 50, [% atrasados (um vendedor)])
+		formatString: 0%;-0%;0%
+		displayFolder: Páginas\Onde
+		lineageTag: c49d47c6-1642-462d-bc39-a8292ea62e49
+
+	/// Seven blue steps, 2.5 points each, from the validated sequential ramp.
+	measure 'Cor · rota' =
+			VAR late = [% atrasados (rota)]
+			RETURN
+			    SWITCH(
+			        TRUE(),
+			        ISBLANK(late), "#F5F5F3",
+			        late < 0.025, "#CDE2FB",
+			        late < 0.05, "#9EC5F4",
+			        late < 0.075, "#6DA7EC",
+			        late < 0.10, "#3987E5",
+			        late < 0.125, "#256ABF",
+			        late < 0.15, "#184F95",
+			        "#0D366B"
+			    )
+		displayFolder: Páginas\Onde
+		lineageTag: 1127007d-03a5-4761-af6d-fd0d4353b270
+
+	measure 'Cor · texto da rota' = IF([% atrasados (rota)] >= 0.075, "#FFFFFF", "#1F1F1D")
+		displayFolder: Páginas\Onde
+		lineageTag: 7cd4e951-3854-40b5-bbe0-abae7586ee3e
+
+	/// Sellers with at least 50 reviewed single-seller orders (analysis 08), so a few orders do not decide the rate.
+	measure 'Vendedores analisados' =
+			COUNTROWS(
+			    FILTER(VALUES(dim_seller[seller_key]), [Pedidos avaliados (um vendedor)] >= 50)
+			)
+		formatString: #,0
+		displayFolder: Páginas\Quem
+		lineageTag: 93d87660-6b62-479e-b71c-d2e12cb03b17
+
+	/// Late share of all single-seller orders in the current selection. Reference line of the seller scatter.
+	measure '% atrasados (referência)' = CALCULATE([% atrasados (um vendedor)], ALLSELECTED(dim_seller))
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Páginas\Quem
+		lineageTag: dae40c35-4536-4e09-9824-a26473d99040
+
+	measure 'Nota média (referência)' = CALCULATE([Nota média (um vendedor)], ALLSELECTED(dim_seller))
+		formatString: 0.00
+		displayFolder: Páginas\Quem
+		lineageTag: b8487bbf-7ce0-4006-a904-d81d056479b6
+
+	/// Orange when the seller is late more often than the reference and scores below it.
+	measure 'Cor · vendedor' =
+			IF(
+			    [% atrasados (um vendedor)] > [% atrasados (referência)]
+			        && [Nota média (um vendedor)] < [Nota média (referência)],
+			    "#EB6834",
+			    "#8F8D87"
+			)
+		displayFolder: Páginas\Quem
+		lineageTag: 14d2d521-e58f-45b6-a52f-6ef7085ed1d2
+
+	measure 'Vendedores que atrasam e têm nota baixa' =
+			VAR late_ref = CALCULATE([% atrasados (um vendedor)], REMOVEFILTERS(dim_seller))
+			VAR score_ref = CALCULATE([Nota média (um vendedor)], REMOVEFILTERS(dim_seller))
+			RETURN
+			    COUNTROWS(
+			        FILTER(
+			            VALUES(dim_seller[seller_key]),
+			            [Pedidos avaliados (um vendedor)] >= 50
+			                && [% atrasados (um vendedor)] > late_ref
+			                && [Nota média (um vendedor)] < score_ref
+			        )
+			    )
+		formatString: #,0
+		displayFolder: Páginas\Quem
+		lineageTag: 83074628-8648-425e-878c-b1d0eeec59fc
+
+	measure 'Vendedores com nota abaixo de 3,5' =
+			COUNTROWS(
+			    FILTER(
+			        VALUES(dim_seller[seller_key]),
+			        [Pedidos avaliados (um vendedor)] >= 50 && [Nota média (um vendedor)] < 3.5
+			    )
+			)
+		formatString: #,0
+		displayFolder: Páginas\Quem
+		lineageTag: af3afa29-7127-4f07-a218-81a7e1ab2abb
+
+	measure 'Vendedores com nota abaixo de 3,5 que atrasam 10%+' =
+			COUNTROWS(
+			    FILTER(
+			        VALUES(dim_seller[seller_key]),
+			        [Pedidos avaliados (um vendedor)] >= 50
+			            && [Nota média (um vendedor)] < 3.5
+			            && [% atrasados (um vendedor)] >= 0.10
+			    )
+			)
+		formatString: #,0
+		displayFolder: Páginas\Quem
+		lineageTag: 02827817-d69d-4c39-a2cd-0b79eb337e9f
+
+	measure 'Nota baixa e atraso (x de y)' =
+			FORMAT([Vendedores com nota abaixo de 3,5 que atrasam 10%+], "0")
+			    & " de " & FORMAT([Vendedores com nota abaixo de 3,5], "0")
+		displayFolder: Páginas\Quem
+		lineageTag: ad8523f1-58fe-4e7f-9ac6-7215ca22cfd5
+
+	measure 'Clientes (pessoas) · texto' = FORMAT([Clientes (pessoas)], "#,0") & " pessoas"
+		displayFolder: Páginas\Definições
+		lineageTag: a6c8ae6b-94d2-459c-934a-81b3e31df819
+
+	measure 'Rótulo · pessoas' = "atrás de " & FORMAT([customer_id distintos], "#,0") & " customer_id: o customer_id muda a cada pedido"
+		displayFolder: Páginas\Definições
+		lineageTag: b67ad687-bcbe-4184-bb40-64ecc42d8152
+
+	/// Page title, first part (dark). Built from measures, so the numbers follow the period filter.
+	measure 'Título · o efeito (início)' = "Atrasar derruba a nota: de " & FORMAT([Nota média (no prazo)], "0.00") & " no prazo para"
+		displayFolder: Páginas\O efeito
+		lineageTag: 9a3d4909-c80a-49e2-99fb-8e29db8bec31
+
+	/// Page title, highlighted part (orange).
+	measure 'Título · o efeito (destaque)' = FORMAT([Nota média (8 a 14 dias de atraso)], "0.00") & " com 8 a 14 dias de atraso"
+		displayFolder: Páginas\O efeito
+		lineageTag: 1ea73558-6a9b-4a41-8d42-543114c135b6
+
+	measure 'Subtítulo · o efeito' =
+			FORMAT([% das notas baixas com atraso], "0%")
+			    & " das notas 1 e 2 vêm de pedidos que chegaram depois da data prometida ao cliente, que são só "
+			    & FORMAT([% atrasados], "0.0%") & " das entregas."
+		displayFolder: Páginas\O efeito
+		lineageTag: 13906ae8-1514-47d9-9252-2d7dbefe6e87
+
+	/// Share of each score group (1-2 or 3-5) within the reviewed orders in context. Feeds the progress bars.
+	measure 'Parte das notas' =
+			DIVIDE(
+			    [Pedidos avaliados],
+			    CALCULATE([Pedidos avaliados], REMOVEFILTERS(fct_orders[score_group]))
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Páginas\O efeito
+		lineageTag: e02e758c-d7ad-4669-90b4-2ea18ccd2ba5
+
+	/// Among states with 500 or more deliveries (analysis 06), the highest share of late orders.
+	measure 'Maior taxa de atraso por estado' =
+			VAR states =
+			    FILTER(
+			        ADDCOLUMNS(VALUES(dim_location[state]), "@late", [% atrasados], "@delivered", [Pedidos entregues]),
+			        [@delivered] >= 500
+			    )
+			RETURN
+			    MAXX(states, [@late])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Páginas\Onde
+		lineageTag: afcd7df0-2700-4c66-bc3e-87f1cbd6d9f7
+
+	measure 'Rótulo · estado com mais atraso' =
+			VAR states =
+			    FILTER(
+			        ADDCOLUMNS(VALUES(dim_location[state]), "@late", [% atrasados], "@delivered", [Pedidos entregues]),
+			        [@delivered] >= 500
+			    )
+			VAR top_state = TOPN(1, states, [@late], DESC)
+			RETURN
+			    MAXX(top_state, dim_location[state]) & ", o estado com mais atraso (500+ entregas)"
+		displayFolder: Páginas\Onde
+		lineageTag: e1a047f1-ffcf-442a-91a6-15f3e9f122ca
+
+	/// Page subtitle: how many states are above the Brazilian average, and the three lowest rates.
+	measure 'Subtítulo · onde' =
+			VAR states =
+			    FILTER(
+			        ADDCOLUMNS(VALUES(dim_location[state]), "@late", [% atrasados], "@delivered", [Pedidos entregues]),
+			        [@delivered] >= 500
+			    )
+			VAR brazil = [% atrasados (Brasil)]
+			VAR above = COUNTROWS(FILTER(states, [@late] > brazil))
+			VAR lowest = TOPN(3, states, [@late], ASC)
+			VAR first_two = CONCATENATEX(TOPN(2, lowest, [@late], ASC), dim_location[state], ", ", [@late], ASC)
+			VAR third = MAXX(TOPN(1, lowest, [@late], DESC), dim_location[state])
+			RETURN
+			    FORMAT(above, "0") & " dos " & FORMAT(COUNTROWS(states), "0")
+			        & " estados com 500+ entregas ficam acima da média; as menores taxas são de "
+			        & first_two & " e " & third & "."
+		displayFolder: Páginas\Onde
+		lineageTag: ecbb5ac8-f145-48fa-be8d-af9e5dd2b7ec
+
+	/// Fixed first part of the title, as a measure so both parts render the same way.
+	measure 'Título · onde (início)' = "A distância não explica tudo: saindo de SP,"
+		displayFolder: Páginas\Onde
+		lineageTag: 968bbfcc-f38b-43b4-bf6d-3588ef93cb93
+
+	/// Page title, highlighted part (orange).
+	measure 'Título · onde (destaque)' = "o Rio atrasa " & FORMAT([% atrasados SP → RJ], "0%") & " e Minas, " & FORMAT([% atrasados SP → MG], "0%")
+		displayFolder: Páginas\Onde
+		lineageTag: 5412b275-0d6b-4e1a-b283-108bb2b726a3
+
+	measure 'Título · quem (início)' = "Quem atrasa tem nota pior:"
+		displayFolder: Páginas\Quem
+		lineageTag: d60446d7-a08f-48d1-94ea-72eae3de6928
+
+	/// Page title, highlighted part (orange).
+	measure 'Título · quem (destaque)' =
+			FORMAT([Vendedores com nota abaixo de 3,5 que atrasam 10%+], "0") & " dos "
+			    & FORMAT([Vendedores com nota abaixo de 3,5], "0") & " vendedores com nota abaixo de 3,5"
+		displayFolder: Páginas\Quem
+		lineageTag: 615e46bd-e6fe-47d1-a54a-a894416ac1d1
+
 	column Value
 		dataType: int64
 		isHidden

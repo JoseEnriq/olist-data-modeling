@@ -23,3 +23,5 @@ ref table fct_payments
 ref table fct_reviews
 ref table Medidas
 
+ref cultureInfo pt-BR
+
