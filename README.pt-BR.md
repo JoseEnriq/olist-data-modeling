@@ -58,6 +58,12 @@ De [docs/results.md](docs/results.md), gerado pelo `scripts/export_results.py`; 
 - **Clientes raramente voltam:** 97% compraram uma vez só.
 - **O cartão de crédito domina:** 74% dos pagamentos, com 3,5 parcelas em média.
 
+## O painel
+
+O star schema também alimenta um painel em Power BI construído em torno de uma pergunta: onde a logística está custando avaliações? Ele está salvo como PBIP, então cada medida e cada visual é texto revisável em [powerbi/](powerbi/); as medidas repetem as definições das consultas em SQL, e os números batem com o `docs/results.md`. As páginas, as escolhas do modelo e como abrir estão em [docs/dashboard.md](docs/dashboard.md).
+
+![Página do painel: a nota média cai de 4,29 no prazo para 1,67 com 8 a 14 dias de atraso](docs/img/dashboard-efeito.png)
+
 ## O que ficou de fora
 
 O projeto cobre modelagem e transformação num banco local. Ingestão de fontes vivas, carga incremental, orquestração e nuvem ficam fora do escopo.
@@ -72,6 +78,7 @@ pip install -r requirements.txt
 python scripts/download_data.py
 cd dbt && dbt deps && dbt build && cd ..
 python scripts/validate_marts.py && python scripts/export_results.py
+python scripts/export_marts.py   # arquivos Parquet para o painel em Power BI
 ```
 
-O `dbt build` cria 19 modelos e roda 117 testes (com um alerta esperado: pontos de geolocalização fora do Brasil). Os relatórios ficam em `docs/validation.md` e `docs/results.md`.
+O `dbt build` cria 19 modelos e roda 117 testes (com um alerta esperado: pontos de geolocalização fora do Brasil). Os relatórios ficam em `docs/validation.md` e `docs/results.md`. Para abrir o painel, abra o `powerbi/olist.pbip` no Power BI Desktop e aponte o parâmetro `MartsFolder` para a sua pasta `data/marts`.
